@@ -12,6 +12,9 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
 Imports:
   BiocManager (>= 1.30.19),
-  tidyverse (>= 1.3.2)
+  tidyverse (>= 1.3.2),
+  GenomicFeatures (>= 1.48.4),
+  Biostrings (>= 2.64.1),
+  ggbio (>= 1.44.1)
 Depends:
   dplyr
