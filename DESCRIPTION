@@ -15,6 +15,6 @@ Imports:
   GenomicFeatures (>= 1.48.4),
   Biostrings (>= 2.64.1),
   ggbio (>= 1.44.1),
-  VariantAnnotation (>= 1.42.1)
 Depends:
+  VariantAnnotation (>= 1.42.1)
   dplyr
