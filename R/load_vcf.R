@@ -6,12 +6,12 @@
 #' @param ASSEMBLY (optional) assembly of the VCF file (default hg38)
 #' @return A matrix of the infile
 load_vcf <- function(VCF_FILE, ASSEMBLY="hg38"){
-  VCF_HEAD<-readLines(VCF_FILE)
+  VCF_HEAD <- readLines(VCF_FILE)
   VCF_DATA <- suppressWarnings(VariantAnnotation::readVcf( VCF_FILE, ASSEMBLY ))
 
-  POS_COL <- data.frame(rowRanges(VCF_DATA)[,"paramRangeID"])[,c('seqnames', 'start')]
-  VAR_COL <- data.frame(rowRanges(VCF_DATA))[,c('QUAL', 'FILTER')]
-  GENO_COL <- geno(VCF_DATA)$GT
+  POS_COL <- data.frame(VariantAnnotation::rowRanges(VCF_DATA)[,"paramRangeID"])[,c('seqnames', 'start')]
+  VAR_COL <- data.frame(VariantAnnotation::rowRanges(VCF_DATA))[,c('QUAL', 'FILTER')]
+  GENO_COL <- VariantAnnotation::geno(VCF_DATA)$GT
   VCF_BODY <- cbind( POS_COL, rownames(GENO_COL), VAR_COL, GENO_COL )
   colnames( VCF_BODY ) <- c( c( 'CHROM', 'POS', 'GT' ), colnames(VCF_BODY)[4:length(colnames(VCF_BODY))] )
 
