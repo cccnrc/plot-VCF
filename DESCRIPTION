@@ -14,6 +14,7 @@ Imports:
   tidyverse (>= 1.3.2),
   GenomicFeatures (>= 1.48.4),
   Biostrings (>= 2.64.1),
-  ggbio (>= 1.44.1)
+  ggbio (>= 1.44.1),
+  VariantAnnotation (>= 1.42.1)
 Depends:
   dplyr

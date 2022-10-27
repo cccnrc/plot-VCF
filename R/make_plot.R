@@ -10,12 +10,12 @@
 make_plot <- function(MODELED_VCF, SEQINFO, VAR_Y, CHR_NAMES=c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22","chrX","chrY")){
   MODELED_VCF  <- MODELED_VCF[ MODELED_VCF[,'CHROM'] %in% CHR_NAMES, c('IND','CHROM','POS')]
   MODELED_VCF <- MODELED_VCF %>% arrange(factor( CHROM, levels = CHR_NAMES ))
-  gr_geno <- GenomicRanges::makeGRangesFromDataFrame(MODELED_VCF, keep.extra.columns = TRUE,
+  gr_geno <- suppressWarnings(GenomicRanges::makeGRangesFromDataFrame(MODELED_VCF, keep.extra.columns = TRUE,
                                       ignore.strand = TRUE, seqinfo = SEQINFO,
                                       seqnames.field = "CHROM", start.field = "POS",
-                                      end.field = "POS")
+                                      end.field = "POS"))
   COL <- viridis::viridis(length(CHR_NAMES))
-  VCF_PLOT <- suppressMessages(ggbio::plotGrandLinear(gr_geno, ggplot2::aes(y = VAR_Y),
+  VCF_PLOT <- suppressWarnings(suppressMessages(ggbio::plotGrandLinear(gr_geno, ggplot2::aes(y = VAR_Y),
                       space.skip = 0.05,
                       xlab = "Chromosome",
                       ylab = "",
@@ -31,6 +31,6 @@ make_plot <- function(MODELED_VCF, SEQINFO, VAR_Y, CHR_NAMES=c("chr1","chr2","ch
                             axis.title.y=ggplot2::element_blank(),
                             legend.position = "none",
                             panel.grid.minor=ggplot2::element_blank(),
-                            panel.grid.major=ggplot2::element_blank()))
+                            panel.grid.major=ggplot2::element_blank())))
   VCF_PLOT
 }
