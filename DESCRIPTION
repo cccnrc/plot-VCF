@@ -1,0 +1,19 @@
+Package: plotVCF
+Title: manhattan plot your VCF file
+Version: 0.0.0.9000
+Authors@R:
+    person("Enrico", "Cocchi", , "cocchi.e89@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-7532-956X"))
+Description: Manhattan plot your VCF file.
+License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
+    license
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.1
+Imports:
+  tidyverse (>= 1.3.2),
+  GenomicFeatures (>= 1.48.4),
+  Biostrings (>= 2.64.1),
+  ggbio (>= 1.44.1)
+Depends:
+  dplyr
