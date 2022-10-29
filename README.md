@@ -30,7 +30,12 @@ There are multiple options you can specify, just have a look at them with:
 ```
 
 # plotVCF usage
-The default behavior of plotVCF()
+The default behavior of `plotVCF()` is to allow visualization of variants position. It will create random Y-values for variants just to allow their visualization:
+```
+plotVCF( VCF, FASTA )
+```
+![plotVCF() basic plot](plots/plotVCF.base.png)
+
 
 # Save plotVCF
 Once you created your plot, you can save it with any R graphic function ([png()](https://cran.r-project.org/web/packages/png/index.html),[pdf()](https://www.rdocumentation.org/packages/grDevices/versions/3.6.2/topics/pdf),[tiff()](https://stat.ethz.ch/R-manual/R-devel/library/grDevices/html/png.html), etc.).

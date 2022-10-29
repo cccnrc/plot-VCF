@@ -11,10 +11,12 @@
 #' @return The VCF variant plot
 make_plot <- function(MODELED_VCF, SEQINFO, VAR_Y=FALSE, VAR_FLAG="POS", THRESHOLD=FALSE, CHR_NAMES=c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22","chrX","chrY")){
   ### if user specified a column to use to plot data use this
+  Y_AXIS_TEXT <- ggplot2::element_blank()
   if ( VAR_FLAG != "POS" ) {
     if ( VAR_FLAG %in% colnames(MODELED_VCF) ){
       MODELED_VCF  <- MODELED_VCF[ MODELED_VCF[,'CHROM'] %in% CHR_NAMES, c('IND','CHROM','POS', VAR_FLAG)]
       VAR_Y <- MODELED_VCF[,VAR_FLAG]
+      Y_AXIS_TEXT <- ggplot2::element_text()
     }
     else {
       cat( "\n\t-> ERROR: undefined VCF flag selected with VAR_FLAG!\n" )
@@ -49,9 +51,9 @@ make_plot <- function(MODELED_VCF, SEQINFO, VAR_Y=FALSE, VAR_FLAG="POS", THRESHO
                             panel.background=ggplot2::element_blank(),
                             panel.border=ggplot2::element_blank(),
                             axis.line=ggplot2::element_blank(),
-                            axis.text.y=ggplot2::element_blank(),
+                            axis.text.y=Y_AXIS_TEXT,
                             axis.title.x=ggplot2::element_blank(),
-                            axis.title.y=ggplot2::element_blank(),
+                            axis.title.y=Y_AXIS_TEXT,
                             legend.position = "none",
                             #panel.grid.minor=ggplot2::element_blank(),
                             panel.grid.minor.y = ggplot2::element_blank(),
