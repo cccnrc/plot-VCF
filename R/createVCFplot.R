@@ -22,22 +22,21 @@ createVCFplot <- function(VCF_FILE, FASTA_FILE, ASSEMBLY="hg38", VAR_FLAG="POS",
     cat('\n')
     cat(' -> loading VCF file ...\n')
   }
-  VCF <- load_vcf(VCF_FILE, ASSEMBLY)
+  VCF <- load_vcf(VCF_FILE, ASSEMBLY=ASSEMBLY)
   VCF <- model_vcf(VCF)
   if ( VERBOSE == TRUE ) {
     cat(' -> loading FASTA file ...\n')
   }
-  SEQ <- load_chr(FASTA_FILE, CHR_NAMES)
+  SEQ <- load_chr(FASTA_FILE, CHR_NAMES=CHR_NAMES)
   if ( VERBOSE == TRUE ) {
     cat(' -> arranging variants ...\n')
   }
-  CHR_N <- get_chr_num(VCF, CHR_NAMES)
-  VAR_Y <- get_chr_plot_step(CHR_N, ORDERED)
+  CHR_N <- get_chr_num(VCF, CHR_NAMES=CHR_NAMES)
+  VAR_Y <- get_chr_plot_step(CHR_N, ORDERED=ORDERED)
   if ( VERBOSE == TRUE ) {
     cat(' -> creating the plot ...\n')
     cat('\n')
   }
-  print( VAR_FLAG )
-  PLOT <- make_plot(VCF, SEQ, VAR_FLAG, VAR_Y, CHR_NAMES)
+  PLOT <- make_plot(VCF, SEQ, VAR_FLAG=VAR_FLAG, VAR_Y=VAR_Y, CHR_NAMES=CHR_NAMES)
   PLOT
 }
