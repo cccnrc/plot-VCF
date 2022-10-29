@@ -8,7 +8,7 @@ createVCFplot(
   VCF_FILE,
   FASTA_FILE,
   ASSEMBLY = "hg38",
-  VALUE = FALSE,
+  VALUE = "POS",
   ORDERED = FALSE,
   CHR_NAMES = c("chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9",
     "chr10", "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18",
@@ -23,7 +23,7 @@ createVCFplot(
 
 \item{ASSEMBLY}{(optional) which assembly your VCF is (hg38/hg19)}
 
-\item{VALUE}{(optional) the VCF variable to use as Y-axis for the variants}
+\item{VALUE}{(optional) the VCF variable to use as Y-axis for the variants, default is just position}
 
 \item{ORDERED}{(optional) if user want to have ordered variant height in the plot or random (if value NOT specified)}
 
