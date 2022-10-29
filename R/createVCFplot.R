@@ -11,7 +11,7 @@
 #' @param VERBOSE (optional) if you want steps printed to stdout
 #' @return the plot
 #' @export
-createVCFplot <- function(VCF_FILE, FASTA_FILE, ASSEMBLY="hg38", VALUE="POS", ORDERED=FALSE, CHR_NAMES=c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22","chrX","chrY"), VERBOSE=TRUE){
+createVCFplot <- function(VCF_FILE, FASTA_FILE, ASSEMBLY="hg38", VAR_FLAG="POS", ORDERED=FALSE, CHR_NAMES=c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22","chrX","chrY"), VERBOSE=TRUE){
   ### cannot use VALUE and ORDERED
   if (( VALUE != "POS" )&( ORDERED != FALSE )) {
     cat('\n')
