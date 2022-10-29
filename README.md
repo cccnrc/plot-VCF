@@ -30,11 +30,44 @@ There are multiple options you can specify, just have a look at them with:
 ```
 
 # plotVCF usage
+Let's have a look on how many different things you can achieve with this package!
+
+All plots in examples below are generated from the same VCF file, that you can find (compressed) [here](inst/extdata/exampleVCF.vcf.gz).
+<span style="color:red">Important!</span>: you need to decompress it first!
+```
+gzip -d inst/extdata/exampleVCF.vcf.gz
+```
+## basic visualization plot
 The default behavior of `plotVCF()` is to allow visualization of variants position. It will create random Y-values for variants just to allow their visualization:
 ```
+VCF <- inst/extdata/exampleVCF.vcf.gz
+FASTA <- <path-to-your-FASTA-file>
+
 plotVCF( VCF, FASTA )
 ```
 ![plotVCF() basic plot](plots/plotVCF.base.png)
+## basic visualization plot - ordered
+You can also choose to order your variants based on sample representation, this will allow you to graphically represent variant number differences across different chromosomes:
+```
+plotVCF( VCF, FASTA, ORDERED=TRUE )
+```
+![plotVCF() ordered plot](plots/plotVCF.ordered.png)
+## user-defined visualization plot
+This is more interesting, you can also specify any numerical VCF variant flag (make sure you have that flag in your VCF) to use as Y-axis in your plot. This creates a sort of Manhattan VCF plot, based on that value.
+
+In this example, I used `QUAL` flag of my variants as Y-axis coordinate:
+```
+plotVCF( VCF, FASTA, VAR_FLAG="QUAL" )
+```
+![plotVCF() var-flag plot](plots/plotVCF.flag.png)
+## user-defined visualization plot - threshold
+You can also use a threshold that will be plotted on your Y-axis defined flag (such as you do with significance in a Manhattan plot):
+```
+plotVCF( VCF, FASTA, VAR_FLAG="QUAL", THRESHOLD=22000 )
+```
+![plotVCF() var-flag threshold plot](plots/plotVCF.flag-threshold.png)
+
+And many more combinations!
 
 
 # Save plotVCF
