@@ -36,6 +36,6 @@ createVCFplot <- function(VCF_FILE, FASTA_FILE, ASSEMBLY="hg38", VALUE="POS", OR
     cat(' -> creating the plot ...\n')
     cat('\n')
   }
-  PLOT <- make_plot(VCF, SEQ, VAR_Y, CHR_NAMES)
+  PLOT <- make_plot(VCF, SEQ, VALUE, VAR_Y, CHR_NAMES)
   PLOT
 }
