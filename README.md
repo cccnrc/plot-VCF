@@ -29,13 +29,13 @@ To use `plotVCF()` you need a [FASTA file](https://en.wikipedia.org/wiki/FASTA_f
 
 You need to use the same FASTA format on which your VCF was aligned to. If you are not sure what are we talking about you should find this information in your [VCF header](https://samtools.github.io/hts-specs/VCFv4.2.pdf). In the examples below I used a [hg38](https://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.26/) aligned VCF. Thus, if you wish to reproduce the plots shown below [download a hg38 FASTA](https://www.gungorbudak.com/blog/2018/05/16/how-to-download-hg38-grch38-fasta-human-reference-genome/)!
 
-<span style="color:red">*Important*</span>: make sure the chromosome names in your FASTA file exactly match chromosome names in your VCF file! (e.g. you can find VCF with `chr1` name format while FASTA may have `1` name format or reversal. Those <ins>VCF and FASTA chromosome names must match!</ins>)
+***Important***: make sure the chromosome names in your FASTA file exactly match chromosome names in your VCF file! (e.g. you can find VCF with `chr1` name format while FASTA may have `1` name format or reversal. Those *VCF and FASTA chromosome names must match!*)
 
 # plotVCF usage
 Let's have a look on how many different things you can achieve with this package!
 
 All plots in examples below are generated from the same VCF file, that you can find (compressed) [here](inst/extdata/exampleVCF.vcf.gz).
-<span style="color:red">*Important*</span>: you need to decompress it first!
+***Important***: you need to decompress it first!
 ```
 gzip -d inst/extdata/exampleVCF.vcf.gz
 ```
