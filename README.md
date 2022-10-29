@@ -29,6 +29,9 @@ There are multiple options you can specify, just have a look at them with:
 ?createVCFplot
 ```
 
+# plotVCF usage
+The default behavior of plotVCF()
+
 # Save plotVCF
 Once you created your plot, you can save it with any R graphic function ([png()](https://cran.r-project.org/web/packages/png/index.html),[pdf()](https://www.rdocumentation.org/packages/grDevices/versions/3.6.2/topics/pdf),[tiff()](https://stat.ethz.ch/R-manual/R-devel/library/grDevices/html/png.html), etc.).
 

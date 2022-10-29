@@ -38,7 +38,7 @@ make_plot <- function(MODELED_VCF, SEQINFO, VAR_Y=FALSE, VAR_FLAG="POS", THRESHO
                                       end.field = "POS"))
   COL <- viridis::viridis(length(CHR_NAMES))
   VCF_PLOT <- suppressWarnings(suppressMessages(ggbio::plotGrandLinear(gr_geno, ggplot2::aes(y = VAR_Y),
-                      space.skip = 0.05,
+                      space.skip = 0.01,
                       xlab = "Chromosome",
                       ylab = "",
                       color = COL) +
