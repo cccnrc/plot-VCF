@@ -30,7 +30,7 @@ There are multiple options you can specify, just have a look at them with:
 ```
 
 # Save plotVCF
-Once you created your plot, you can save it as you wish. Something I like:
+Once you created your plot, you can save it with any external function (png(),pdf(),). Something I like:
 ```
 VCF_PLOT <- createVCFplot( VCF, FASTA )
 

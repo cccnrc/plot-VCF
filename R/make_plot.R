@@ -20,11 +20,14 @@ make_plot <- function(MODELED_VCF, SEQINFO, VAR_Y, VAR_FLAG="POS", THRESHOLD=FAL
       cat( "\n\t-> ERROR: undefined VCF flag selected with VAR_FLAG!\n" )
     }
   }
+  ### default if no THRESHOLD was specified
+  Y_THRESHOLD <- 0
   Y_THRESHOLD_THICKNESS <- 0
   if ( THRESHOLD != FALSE ) {
-    Y_THRESHOLD = THRESHOLD
+    Y_THRESHOLD <- THRESHOLD
     Y_THRESHOLD_THICKNESS <- 0.4
   }
+  ### order the DF based on chromosomes
   MODELED_VCF <- MODELED_VCF %>% arrange(factor( CHROM, levels = CHR_NAMES ))
   gr_geno <- suppressWarnings(GenomicRanges::makeGRangesFromDataFrame(MODELED_VCF, keep.extra.columns = TRUE,
                                       ignore.strand = TRUE, seqinfo = SEQINFO,
