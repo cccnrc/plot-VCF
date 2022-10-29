@@ -31,8 +31,11 @@ createVCFplot <- function(VCF_FILE, FASTA_FILE, ASSEMBLY="hg38", VAR_FLAG="POS",
   if ( VERBOSE == TRUE ) {
     cat(' -> arranging variants ...\n')
   }
-  CHR_N <- get_chr_num(VCF, CHR_NAMES=CHR_NAMES)
-  VAR_Y <- get_chr_plot_step(CHR_N, ORDERED=ORDERED)
+  ### do not need those if user-specified Y axis
+  if ( VAR_FLAG == "POS" ) {
+    CHR_N <- get_chr_num(VCF, CHR_NAMES=CHR_NAMES)
+    VAR_Y <- get_chr_plot_step(CHR_N, ORDERED=ORDERED)
+  }
   if ( VERBOSE == TRUE ) {
     cat(' -> creating the plot ...\n')
     cat('\n')
