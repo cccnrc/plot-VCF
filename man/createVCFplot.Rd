@@ -23,13 +23,13 @@ createVCFplot(
 
 \item{ASSEMBLY}{(optional) which assembly your VCF is (hg38/hg19)}
 
+\item{VAR_FLAG}{(optional) the VCF variable to use as Y-axis for the variants, default is just position}
+
 \item{ORDERED}{(optional) if user want to have ordered variant height in the plot or random (if value NOT specified)}
 
 \item{CHR_NAMES}{(optional) vector with chromosme names to plot}
 
 \item{VERBOSE}{(optional) if you want steps printed to stdout}
-
-\item{VALUE}{(optional) the VCF variable to use as Y-axis for the variants, default is just position}
 }
 \value{
 the plot
