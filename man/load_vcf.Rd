@@ -4,12 +4,16 @@
 \alias{load_vcf}
 \title{Load a VCF file}
 \usage{
-load_vcf(VCF_FILE, ASSEMBLY = "hg38")
+load_vcf(VCF_FILE, ASSEMBLY = "hg38", SAMPLE = "ALL", VAR_FLAG = "POS")
 }
 \arguments{
 \item{VCF_FILE}{Path to the input VCF file}
 
 \item{ASSEMBLY}{(optional) assembly of the VCF file (default hg38)}
+
+\item{SAMPLE}{(optional) samples to plot}
+
+\item{VAR_FLAG}{(optional) the VCF variable to use as Y-axis for the variants, default is just position}
 }
 \value{
 A matrix of the infile

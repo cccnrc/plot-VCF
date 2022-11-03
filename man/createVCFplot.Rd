@@ -9,6 +9,7 @@ createVCFplot(
   FASTA_FILE,
   ASSEMBLY = "hg38",
   VAR_FLAG = "POS",
+  SAMPLE = "ALL",
   THRESHOLD = FALSE,
   ORDERED = FALSE,
   CHR_NAMES = c("chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9",
@@ -25,6 +26,8 @@ createVCFplot(
 \item{ASSEMBLY}{(optional) which assembly your VCF is (hg38/hg19)}
 
 \item{VAR_FLAG}{(optional) the VCF variable to use as Y-axis for the variants, default is just position}
+
+\item{SAMPLE}{(optional) samples to plot}
 
 \item{THRESHOLD}{(optional) a threshold line to use as Y-axis}
 
