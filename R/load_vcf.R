@@ -4,35 +4,102 @@
 #'
 #' @param VCF_FILE Path to the input VCF file
 #' @param ASSEMBLY (optional) assembly of the VCF file (default hg38)
+#' @param SAMPLE (optional) samples to plot
+#' @param VAR_FLAG (optional) the VCF variable to use as Y-axis for the variants, default is just position
 #' @return A matrix of the infile
-load_vcf <- function(VCF_FILE, ASSEMBLY="hg38"){
-  VCF_HEAD <- readLines(VCF_FILE)
-  VCF_DATA <- suppressWarnings(VariantAnnotation::readVcf( VCF_FILE, ASSEMBLY ))
+load_vcf <- function( VCF_FILE, ASSEMBLY="hg38", SAMPLE="ALL", VAR_FLAG="POS" ){
 
+  VCF_DATA <- suppressWarnings(VariantAnnotation::readVcf( VCF_FILE, ASSEMBLY ))
   POS_COL <- data.frame(rowRanges(VCF_DATA)[,"paramRangeID"])[,c('seqnames', 'start')]
   VAR_COL <- data.frame(rowRanges(VCF_DATA))[,c('QUAL', 'FILTER')]
-  GENO_COL <- geno(VCF_DATA)$GT
-  VCF_BODY <- cbind( POS_COL, rownames(GENO_COL), VAR_COL, GENO_COL )
-  colnames( VCF_BODY ) <- c( c( 'CHROM', 'POS', 'GT' ), colnames(VCF_BODY)[4:length(colnames(VCF_BODY))] )
 
-  # VCF_DATA<-read.table( VCF_FILE, stringsAsFactors = FALSE)
+  if (( length(SAMPLE) > 1 ) || ( SAMPLE != "ALL" )) {
+    ### extract GT column
+    if ( 'GT' %in% names(geno(VCF_DATA)) ) {
+      GENO_COL <- geno(VCF_DATA)$GT[,SAMPLE]
+      if ( length(SAMPLE) == 1 ) {
+        GENO_COL <- data.frame(SAMPLE = GENO_COL)
+        colnames(GENO_COL) <- SAMPLE
+      }
+    } else {
+      cat( "\n\t-> ERROR: cannot find GT value in VCF genotype column!\n" )
+      stop()
+    }
+    ### extract AF column if present
+    if ( 'AF' %in% names(geno(VCF_DATA)) ) {
+      AF_COL <- geno(VCF_DATA)$AF[,SAMPLE]
+    }
+    ### extract DP column if present
+    if ( 'DP' %in% names(geno(VCF_DATA)) ) {
+      DP_COL <- geno(VCF_DATA)$DP[,SAMPLE]
+    }
+  ### if SAMPLE not specified load all samples
+  } else {
+    ### extract GT column
+    if ( 'GT' %in% names(geno(VCF_DATA)) ) {
+      GENO_COL <- geno(VCF_DATA)$GT
+    } else {
+      cat( "\n\t-> ERROR: cannot find GT value in VCF genotype column!\n" )
+      stop()
+    }
+    ### extract AF column if present
+    if ( 'AF' %in% names(geno(VCF_DATA)) ) {
+      AF_COL <- geno(VCF_DATA)$AF
+    }
+    ### extract DP column if present
+    if ( 'DP' %in% names(geno(VCF_DATA)) ) {
+      DP_COL <- geno(VCF_DATA)$DP
+    }
+  }
 
-  # TO_MATCH <- c("^#", "*Flag")
-  # MATCH <- VCF_HEAD[ grep(paste(TO_MATCH, collapse="."), VCF_HEAD ) ]
-  # FLAGS <- gsub('^.*ID=\\s*|\\s*,.*$', '', MATCH)
+  ### if AF column found
+  if ( exists("AF_COL") ) {
+    if (( length(SAMPLE) > 1 )||( SAMPLE == "ALL" )) {
+      AF_MED <- apply(AF_COL,1,function(v) median(as.numeric(v),na.rm = T))
+      AF_MEDF <- data.frame( 'AF' = AF_MED )
+    } else {
+      AF_MEDF <- data.frame( 'AF' = as.numeric(AF_COL) )
+    }
+  }
 
-  ### replace in VCF data
-  # OLD_COL <- VCF_DATA[,8]
-  # for ( F in FLAGS ) {
-  #   REG <- paste( F, ";", sep = '' )
-  #   OLD_COL <- sub( REG, "", OLD_COL )
-  # }
-  # VCF_DATA[,8] <- OLD_COL
+  ### if DP column found
+  if ( exists("DP_COL") ) {
+    if (( length(SAMPLE) > 1 )||( SAMPLE == "ALL" )) {
+      DP_MED <- apply(DP_COL,1,function(v) median(as.numeric(v),na.rm = T))
+      DP_MEDF <- data.frame( 'DP' = DP_MED )
+    } else {
+      DP_MEDF <- data.frame( 'DP' = as.numeric(DP_COL) )
+    }
+  }
 
-  ### column names
-  # VCF_HEAD <- VCF_HEAD[-(grep("#CHROM",VCF_HEAD)+1):-(length(VCF_HEAD))]
-  # VCF_COLNAMES <- unlist(strsplit(VCF_HEAD[length(VCF_HEAD)],"\t"))
-  # names(VCF_DATA) <- VCF_COLNAMES
-  # VCF_DATA
+
+  ### if AF found add it to the dataframe
+  if ( exists("AF_MEDF") ) {
+    VCF_BODY_PRE <- cbind( POS_COL, rownames(GENO_COL), VAR_COL, AF_MEDF )
+  } else {
+    VCF_BODY_PRE <- cbind( POS_COL, rownames(GENO_COL), VAR_COL )
+  }
+
+  ### if DP found add it to the dataframe
+  if ( exists("DP_MEDF") ) {
+    VCF_BODY_PRE <- cbind( VCF_BODY_PRE, DP_MEDF )
+  }
+
+  ### add GT columns
+  VCF_BODY <- cbind( VCF_BODY_PRE, GENO_COL )
+
+  ### put correct colnames
+  colnames( VCF_BODY ) <- c( c( 'CHROM', 'POS', 'VAR' ), colnames(VAR_COL), colnames(VCF_BODY)[6:length(colnames(VCF_BODY))] )
+
+  ### check VAR_FLAG was found (if specified)
+  if ( VAR_FLAG != "POS" ) {
+    if ( VAR_FLAG %in% colnames(VCF_BODY) ) {
+      cat( "    -> VAR_FLAG column found and loaded\n" )
+    } else {
+      cat( "\n\t-> ERROR: cannot find VAR_FLAG value in VCF column!\n" )
+      stop()
+    }
+  }
+
   VCF_BODY
 }

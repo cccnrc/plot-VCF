@@ -20,6 +20,7 @@ make_plot <- function(MODELED_VCF, SEQINFO, VAR_Y=FALSE, VAR_FLAG="POS", THRESHO
     }
     else {
       cat( "\n\t-> ERROR: undefined VCF flag selected with VAR_FLAG!\n" )
+      stop()
     }
   }
   else {
