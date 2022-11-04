@@ -5,7 +5,7 @@
 #' @param VCF_FILE Path to the input VCF file
 #' @param FASTA_FILE Path to the input FASTA file
 #' @param ASSEMBLY (optional) which assembly your VCF is (hg38/hg19)
-#' @param SAMPLE (optional) samples to plot
+#' @param SAMPLE (optional) samples to plot (default is all samples in VCF file)
 #' @param VAR_FLAG (optional) the VCF variable to use as Y-axis for the variants, default is just position
 #' @param THRESHOLD (optional) a threshold line to use as Y-axis
 #' @param ORDERED (optional) if user want to have ordered variant height in the plot or random (if value NOT specified)

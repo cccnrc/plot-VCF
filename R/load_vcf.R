@@ -4,7 +4,7 @@
 #'
 #' @param VCF_FILE Path to the input VCF file
 #' @param ASSEMBLY (optional) assembly of the VCF file (default hg38)
-#' @param SAMPLE (optional) samples to plot
+#' @param SAMPLE (optional) samples to plot (default is all samples in VCF file)
 #' @param VAR_FLAG (optional) the VCF variable to use as Y-axis for the variants, default is just position
 #' @return A matrix of the infile
 load_vcf <- function( VCF_FILE, ASSEMBLY="hg38", SAMPLE="ALL", VAR_FLAG="POS" ){
@@ -12,7 +12,48 @@ load_vcf <- function( VCF_FILE, ASSEMBLY="hg38", SAMPLE="ALL", VAR_FLAG="POS" ){
   VCF_DATA <- suppressWarnings(VariantAnnotation::readVcf( VCF_FILE, ASSEMBLY ))
   POS_COL <- data.frame(rowRanges(VCF_DATA)[,"paramRangeID"])[,c('seqnames', 'start')]
   VAR_COL <- data.frame(rowRanges(VCF_DATA))[,c('QUAL', 'FILTER')]
+  VCF_SAMPLES <- rownames(colData( VCF_DATA ))
+  cat( "    -> VCF samples:", length(VCF_SAMPLES),"\n" )
 
+  ### check all specified samples are in VCF
+  if (( length(SAMPLE) > 1 ) || ( SAMPLE != "ALL" )) {
+    for ( SAM in SAMPLE )
+    {
+      if ( ! SAM %in% VCF_SAMPLES ) {
+        cat( "\t-> ERROR: cannot find specified sample:", SAM, "in VCF!\n" )
+        stop()
+      }
+    }
+    cat( "    -> all specified samples", paste("(n. ", length(SAMPLE), ")", sep = ''), "in VCF!\n" )
+  }
+
+  ### select genotype columns that are numeric with single data
+  GH <- data.frame(geno(header(VCF_DATA)))
+  GHE <- GH[ GH[,'Type'] == "Integer" & GH[,'Number'] == 1, ]
+
+  ### extract ALL geno columns and cbind() to VAR_COL
+  GHE_TOT <- length(rownames(GHE))
+  i <- 0
+  for ( NAME in rownames(GHE) )
+  {
+    i <- i+1
+    if (( length(SAMPLE) > 1 ) || ( SAMPLE != "ALL" )) {
+      TMP_DB <- data.frame(geno(VCF_DATA)[[NAME]])[,SAMPLE]
+    } else {
+      TMP_DB <- data.frame(geno(VCF_DATA)[[NAME]])
+    }
+    if (( length(SAMPLE) > 1 ) || ( SAMPLE == "ALL" )) {
+      TMP_COL <- apply(TMP_DB,1,function(v) median(as.numeric(v),na.rm = T))
+    } else {
+      TMP_COL <- as.numeric(TMP_DB)
+    }
+    TMP_COL_DB <- data.frame( NAME = TMP_COL )
+    colnames(TMP_COL_DB) <- NAME
+    VAR_COL <- cbind( VAR_COL, TMP_COL_DB )
+    cat( "      ->", paste(i,'/',GHE_TOT,sep='') ,"genotype column", NAME, "found and loaded...\n" )
+  }
+
+  ### get GT value
   if (( length(SAMPLE) > 1 ) || ( SAMPLE != "ALL" )) {
     ### extract GT column
     if ( 'GT' %in% names(geno(VCF_DATA)) ) {
@@ -25,14 +66,6 @@ load_vcf <- function( VCF_FILE, ASSEMBLY="hg38", SAMPLE="ALL", VAR_FLAG="POS" ){
       cat( "\n\t-> ERROR: cannot find GT value in VCF genotype column!\n" )
       stop()
     }
-    ### extract AF column if present
-    if ( 'AF' %in% names(geno(VCF_DATA)) ) {
-      AF_COL <- geno(VCF_DATA)$AF[,SAMPLE]
-    }
-    ### extract DP column if present
-    if ( 'DP' %in% names(geno(VCF_DATA)) ) {
-      DP_COL <- geno(VCF_DATA)$DP[,SAMPLE]
-    }
   ### if SAMPLE not specified load all samples
   } else {
     ### extract GT column
@@ -42,54 +75,13 @@ load_vcf <- function( VCF_FILE, ASSEMBLY="hg38", SAMPLE="ALL", VAR_FLAG="POS" ){
       cat( "\n\t-> ERROR: cannot find GT value in VCF genotype column!\n" )
       stop()
     }
-    ### extract AF column if present
-    if ( 'AF' %in% names(geno(VCF_DATA)) ) {
-      AF_COL <- geno(VCF_DATA)$AF
-    }
-    ### extract DP column if present
-    if ( 'DP' %in% names(geno(VCF_DATA)) ) {
-      DP_COL <- geno(VCF_DATA)$DP
-    }
-  }
-
-  ### if AF column found
-  if ( exists("AF_COL") ) {
-    if (( length(SAMPLE) > 1 )||( SAMPLE == "ALL" )) {
-      AF_MED <- apply(AF_COL,1,function(v) median(as.numeric(v),na.rm = T))
-      AF_MEDF <- data.frame( 'AF' = AF_MED )
-    } else {
-      AF_MEDF <- data.frame( 'AF' = as.numeric(AF_COL) )
-    }
-  }
-
-  ### if DP column found
-  if ( exists("DP_COL") ) {
-    if (( length(SAMPLE) > 1 )||( SAMPLE == "ALL" )) {
-      DP_MED <- apply(DP_COL,1,function(v) median(as.numeric(v),na.rm = T))
-      DP_MEDF <- data.frame( 'DP' = DP_MED )
-    } else {
-      DP_MEDF <- data.frame( 'DP' = as.numeric(DP_COL) )
-    }
-  }
-
-
-  ### if AF found add it to the dataframe
-  if ( exists("AF_MEDF") ) {
-    VCF_BODY_PRE <- cbind( POS_COL, rownames(GENO_COL), VAR_COL, AF_MEDF )
-  } else {
-    VCF_BODY_PRE <- cbind( POS_COL, rownames(GENO_COL), VAR_COL )
-  }
-
-  ### if DP found add it to the dataframe
-  if ( exists("DP_MEDF") ) {
-    VCF_BODY_PRE <- cbind( VCF_BODY_PRE, DP_MEDF )
   }
 
   ### add GT columns
-  VCF_BODY <- cbind( VCF_BODY_PRE, GENO_COL )
+  VCF_BODY <- cbind( POS_COL, rownames(GENO_COL), VAR_COL, GENO_COL )
 
   ### put correct colnames
-  colnames( VCF_BODY ) <- c( c( 'CHROM', 'POS', 'VAR' ), colnames(VAR_COL), colnames(VCF_BODY)[6:length(colnames(VCF_BODY))] )
+  colnames( VCF_BODY ) <- c( c( 'CHROM', 'POS', 'VAR' ), colnames(VAR_COL), colnames(GENO_COL) )
 
   ### check VAR_FLAG was found (if specified)
   if ( VAR_FLAG != "POS" ) {

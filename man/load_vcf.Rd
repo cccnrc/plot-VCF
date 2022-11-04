@@ -11,7 +11,7 @@ load_vcf(VCF_FILE, ASSEMBLY = "hg38", SAMPLE = "ALL", VAR_FLAG = "POS")
 
 \item{ASSEMBLY}{(optional) assembly of the VCF file (default hg38)}
 
-\item{SAMPLE}{(optional) samples to plot}
+\item{SAMPLE}{(optional) samples to plot (default is all samples in VCF file)}
 
 \item{VAR_FLAG}{(optional) the VCF variable to use as Y-axis for the variants, default is just position}
 }

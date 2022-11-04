@@ -27,7 +27,7 @@ createVCFplot(
 
 \item{VAR_FLAG}{(optional) the VCF variable to use as Y-axis for the variants, default is just position}
 
-\item{SAMPLE}{(optional) samples to plot}
+\item{SAMPLE}{(optional) samples to plot (default is all samples in VCF file)}
 
 \item{THRESHOLD}{(optional) a threshold line to use as Y-axis}
 
