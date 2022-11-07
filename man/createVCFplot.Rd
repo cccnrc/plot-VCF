@@ -10,6 +10,7 @@ createVCFplot(
   ASSEMBLY = "hg38",
   VAR_FLAG = "POS",
   SAMPLE = "ALL",
+  XLIM = FALSE,
   THRESHOLD = FALSE,
   ORDERED = FALSE,
   CHR_NAMES = c("chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9",
@@ -28,6 +29,8 @@ createVCFplot(
 \item{VAR_FLAG}{(optional) the VCF variable to use as Y-axis for the variants, default is just position}
 
 \item{SAMPLE}{(optional) samples to plot (default is all samples in VCF file)}
+
+\item{XLIM}{(optional) limits for Y-axis}
 
 \item{THRESHOLD}{(optional) a threshold line to use as Y-axis}
 

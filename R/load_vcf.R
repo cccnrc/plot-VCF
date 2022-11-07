@@ -11,7 +11,6 @@ load_vcf <- function( VCF_FILE, ASSEMBLY="hg38", SAMPLE="ALL", VAR_FLAG="POS" ){
 
   VCF_DATA <- suppressWarnings(VariantAnnotation::readVcf( VCF_FILE, ASSEMBLY ))
   POS_COL <- data.frame(rowRanges(VCF_DATA)[,"paramRangeID"])[,c('seqnames', 'start')]
-  VAR_COL <- data.frame(rowRanges(VCF_DATA))[,c('QUAL', 'FILTER')]
   VCF_SAMPLES <- rownames(colData( VCF_DATA ))
   cat( "    -> VCF samples:", length(VCF_SAMPLES),"\n" )
 
@@ -27,30 +26,35 @@ load_vcf <- function( VCF_FILE, ASSEMBLY="hg38", SAMPLE="ALL", VAR_FLAG="POS" ){
     cat( "    -> all specified samples", paste("(n. ", length(SAMPLE), ")", sep = ''), "in VCF!\n" )
   }
 
-  ### select genotype columns that are numeric with single data
-  GH <- data.frame(geno(header(VCF_DATA)))
-  GHE <- GH[ GH[,'Type'] == "Integer" & GH[,'Number'] == 1, ]
 
-  ### extract ALL geno columns and cbind() to VAR_COL
-  GHE_TOT <- length(rownames(GHE))
-  i <- 0
-  for ( NAME in rownames(GHE) )
-  {
-    i <- i+1
-    if (( length(SAMPLE) > 1 ) || ( SAMPLE != "ALL" )) {
-      TMP_DB <- data.frame(geno(VCF_DATA)[[NAME]])[,SAMPLE]
+  ### if user wants POS do not need to store the rest of database
+  if ( VAR_FLAG != "POS" ) {
+    if ( VAR_FLAG == "QUAL" ) {
+      TMP_COL_DB <- data.frame(rowRanges(VCF_DATA))[,'QUAL']
+      VAR_COL <- data.frame( "QUAL" = TMP_COL_DB )
     } else {
-      TMP_DB <- data.frame(geno(VCF_DATA)[[NAME]])
+      ### select genotype columns that are numeric with single data
+      GH <- data.frame(geno(header(VCF_DATA)))
+      GHE <- GH[ GH[,'Type'] == "Integer" & GH[,'Number'] == 1, ]
+      if ( VAR_FLAG %in% rownames(GHE) ) {
+        ### get flag number
+        NAME <- VAR_FLAG
+        if (( length(SAMPLE) > 1 ) || ( SAMPLE != "ALL" )) {
+          TMP_DB <- data.frame(geno(VCF_DATA)[[NAME]])[,SAMPLE]
+        } else {
+          TMP_DB <- data.frame(geno(VCF_DATA)[[NAME]])
+        }
+        if (( length(SAMPLE) > 1 ) || ( SAMPLE == "ALL" )) {
+          TMP_COL <- apply(TMP_DB,1,function(v) median(as.numeric(v),na.rm = T))
+        } else {
+          TMP_COL <- as.numeric(TMP_DB)
+        }
+        TMP_COL_DB <- data.frame( NAME = TMP_COL )
+        colnames(TMP_COL_DB) <- NAME
+        VAR_COL <- TMP_COL_DB
+        cat( "      -> VAR_FLAG column:", NAME, "found and loaded...\n" )
+      }
     }
-    if (( length(SAMPLE) > 1 ) || ( SAMPLE == "ALL" )) {
-      TMP_COL <- apply(TMP_DB,1,function(v) median(as.numeric(v),na.rm = T))
-    } else {
-      TMP_COL <- as.numeric(TMP_DB)
-    }
-    TMP_COL_DB <- data.frame( NAME = TMP_COL )
-    colnames(TMP_COL_DB) <- NAME
-    VAR_COL <- cbind( VAR_COL, TMP_COL_DB )
-    cat( "      ->", paste(i,'/',GHE_TOT,sep='') ,"genotype column", NAME, "found and loaded...\n" )
   }
 
   ### get GT value
@@ -85,9 +89,7 @@ load_vcf <- function( VCF_FILE, ASSEMBLY="hg38", SAMPLE="ALL", VAR_FLAG="POS" ){
 
   ### check VAR_FLAG was found (if specified)
   if ( VAR_FLAG != "POS" ) {
-    if ( VAR_FLAG %in% colnames(VCF_BODY) ) {
-      cat( "    -> VAR_FLAG column found and loaded\n" )
-    } else {
+    if ( ! VAR_FLAG %in% colnames(VCF_BODY) ) {
       cat( "\n\t-> ERROR: cannot find VAR_FLAG value in VCF column!\n" )
       stop()
     }

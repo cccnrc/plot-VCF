@@ -6,6 +6,7 @@
 #' @param FASTA_FILE Path to the input FASTA file
 #' @param ASSEMBLY (optional) which assembly your VCF is (hg38/hg19)
 #' @param SAMPLE (optional) samples to plot (default is all samples in VCF file)
+#' @param XLIM (optional) limits for Y-axis
 #' @param VAR_FLAG (optional) the VCF variable to use as Y-axis for the variants, default is just position
 #' @param THRESHOLD (optional) a threshold line to use as Y-axis
 #' @param ORDERED (optional) if user want to have ordered variant height in the plot or random (if value NOT specified)
@@ -13,7 +14,7 @@
 #' @param VERBOSE (optional) if you want steps printed to stdout
 #' @return the plot
 #' @export
-createVCFplot <- function(VCF_FILE, FASTA_FILE, ASSEMBLY="hg38", VAR_FLAG="POS", SAMPLE="ALL", THRESHOLD=FALSE, ORDERED=FALSE, CHR_NAMES=c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22","chrX","chrY"), VERBOSE=TRUE){
+createVCFplot <- function(VCF_FILE, FASTA_FILE, ASSEMBLY="hg38", VAR_FLAG="POS", SAMPLE="ALL", XLIM=FALSE, THRESHOLD=FALSE, ORDERED=FALSE, CHR_NAMES=c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22","chrX","chrY"), VERBOSE=TRUE){
   ### cannot use VAR_FLAG and ORDERED
   if (( VAR_FLAG != "POS" )&( ORDERED != FALSE )) {
     cat('\n')
@@ -43,6 +44,6 @@ createVCFplot <- function(VCF_FILE, FASTA_FILE, ASSEMBLY="hg38", VAR_FLAG="POS",
     cat(' -> creating the plot ...\n')
     cat('\n')
   }
-  PLOT <- make_plot(VCF, SEQ, VAR_FLAG=VAR_FLAG, THRESHOLD=THRESHOLD, VAR_Y=VAR_Y, CHR_NAMES=CHR_NAMES)
+  PLOT <- make_plot(VCF, SEQ, VAR_FLAG=VAR_FLAG, THRESHOLD=THRESHOLD, VAR_Y=VAR_Y, CHR_NAMES=CHR_NAMES, XLIM=XLIM)
   PLOT
 }
