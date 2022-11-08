@@ -1,4 +1,8 @@
-This is the repo for VCF files plot
+How many times you hoped to easily plot variants in yout VCF files in order to operate a fast visual analysis on them?!
+
+It happened to me soo many times...and this is exactly why we created this R package!
+
+Let's a brief look at how it works
 
 # Install plotVCF
 Installing `plotVCF` is as simple as:
@@ -10,12 +14,14 @@ remotes::install_github(
     repos = BiocManager::repositories()
 )
 ```
-If you know a bit of R code (no worries, you don't really need to :wink:) you noticed that it only requires [devtools](https://devtools.r-lib.org/) and [BiocManager](https://cran.r-project.org/web/packages/BiocManager/vignettes/BiocManager.html).
+If you know a bit of R code (no worries, you don't really need to) you noticed that it only requires [devtools](https://devtools.r-lib.org/) and [BiocManager](https://cran.r-project.org/web/packages/BiocManager/vignettes/BiocManager.html).
 
 The rest of dependencies you need will be installed directly with `plotVCF`: that's why installation will probably take a while (but you need to perform it only once :wink:)
 
 # Run plotVCF
-To use `plotVCF` you only need to point it to a VCF and a FASTA file. Then just call the `createVCFplot()` funtion on them and you will get your Manhattan VCF plot out!
+To use `plotVCF` you only need to point it to your VCF file.
+
+Then just call the `createVCFplot()` funtion on them and you will get your Manhattan VCF plot out!
 ```
 library(plotVCF)
 

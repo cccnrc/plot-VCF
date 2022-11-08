@@ -12,20 +12,29 @@
 #' @param THRESHOLD (optional) a threshold line to use as Y-axis
 #' @param ORDERED (optional) if user want to have ordered variant height in the plot or random (if value NOT specified)
 #' @param CHR_NAMES (optional) vector with chromosme names to plot
+#' @param CHR_Y (optional) extend the analysis to chrY
 #' @param VERBOSE (optional) if you want steps printed to stdout
 #' @return the plot
 #' @export
-createVCFplot <- function(VCF_FILE, FASTA_FILE = FALSE, ASSEMBLY="hg38", VAR_FLAG="POS", SHAPE=FALSE, SAMPLE="ALL", XLIM=FALSE, THRESHOLD=FALSE, ORDERED=FALSE, CHR_NAMES=FALSE, VERBOSE=TRUE){
+createVCFplot <- function(VCF_FILE, FASTA_FILE = FALSE, ASSEMBLY="hg38", VAR_FLAG="POS", SHAPE=FALSE, SAMPLE="ALL", XLIM=FALSE, THRESHOLD=FALSE, ORDERED=FALSE, CHR_NAMES=FALSE, CHR_Y=FALSE, VERBOSE=TRUE){
   ### check ASSEMBLY or CHR_NAMES are specified
-  if ( CHR_NAMES == FALSE ) {
-    if ( ASSEMBLY == 'hg38' ) {
-      CHR_NAMES <- c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22","chrX","chrY")
-    }
-    else if ( ASSEMBLY == 'GRCh37' ) {
-      CHR_NAMES <- c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "X", "Y", "MT")
-    } else {
-      cat(' -> please specify either default assembly (hg38/GRCh37) or CHR_NAMES to plot! (see documentation)...\n')
-      stop()
+  if ( length(CHR_NAMES) == 1 ) {
+    if ( CHR_NAMES == FALSE ) {
+      if ( ASSEMBLY == 'hg38' ) {
+        CHR_NAMES <- c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22","chrX")
+        if ( CHR_Y != FALSE ) {
+          CHR_NAMES <- c( CHR_NAMES, "chrY" )
+        }
+      }
+      else if ( ASSEMBLY == 'GRCh37' ) {
+        CHR_NAMES <- c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "X")
+        if ( CHR_Y != FALSE ) {
+          CHR_NAMES <- c( CHR_NAMES, "Y" )
+        }
+      } else {
+        cat(' -> please specify either default assembly (hg38/GRCh37) or CHR_NAMES to plot! (see documentation)...\n')
+        stop()
+      }
     }
   }
   ### output passed arguments
@@ -53,6 +62,9 @@ createVCFplot <- function(VCF_FILE, FASTA_FILE = FALSE, ASSEMBLY="hg38", VAR_FLA
   if ( SHAPE != FALSE ) {
     cat('    -> input shape:', '\t', SHAPE, '\n' )
   }
+  if ( CHR_Y != FALSE ) {
+    cat('    -> input chrY:', '\t', CHR_Y, '\n' )
+  }
   cat('---------------------------------------------------------------------------\n')
   cat('\n')
   ### cannot use VAR_FLAG and ORDERED
@@ -61,12 +73,6 @@ createVCFplot <- function(VCF_FILE, FASTA_FILE = FALSE, ASSEMBLY="hg38", VAR_FLA
     cat(' -> can not use both VAR_FLAG and ORDERED! (see documentation). Choose only one...\n')
     stop()
   }
-  if ( VERBOSE == TRUE ) {
-    cat('\n')
-    cat(' -> loading VCF file ...\n')
-  }
-  VCF <- load_vcf(VCF_FILE, ASSEMBLY=ASSEMBLY, SAMPLE=SAMPLE, VAR_FLAG=VAR_FLAG)
-  VCF <- model_vcf(VCF)
   ### if user specified their own FASTA file use this
   if ( FASTA_FILE != FALSE ) {
     if ( VERBOSE == TRUE ) {
@@ -97,6 +103,14 @@ createVCFplot <- function(VCF_FILE, FASTA_FILE = FALSE, ASSEMBLY="hg38", VAR_FLA
       stop()
     }
   }
+  ### load VCF file
+  if ( VERBOSE == TRUE ) {
+    cat('\n')
+    cat(' -> loading VCF file ...\n')
+  }
+  LOAD_VCF_LIST <- load_vcf(VCF_FILE, SEQ, ASSEMBLY=ASSEMBLY, SAMPLE=SAMPLE, VAR_FLAG=VAR_FLAG, CHR_NAMES=CHR_NAMES)
+  VCF <- model_vcf(LOAD_VCF_LIST$VCF)
+  SEQ <- LOAD_VCF_LIST$SEQINFO
   if ( VERBOSE == TRUE ) {
     cat(' -> arranging variants ...\n')
   }
@@ -111,5 +125,6 @@ createVCFplot <- function(VCF_FILE, FASTA_FILE = FALSE, ASSEMBLY="hg38", VAR_FLA
     cat('\n')
   }
   PLOT <- make_plot(VCF, SEQ, VAR_FLAG=VAR_FLAG, THRESHOLD=THRESHOLD, VAR_Y=VAR_Y, CHR_NAMES=CHR_NAMES, XLIM=XLIM, SHAPE=SHAPE)
+  cat('---------------------------------------------------------------------------\n')
   PLOT
 }

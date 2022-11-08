@@ -15,6 +15,7 @@ createVCFplot(
   THRESHOLD = FALSE,
   ORDERED = FALSE,
   CHR_NAMES = FALSE,
+  CHR_Y = FALSE,
   VERBOSE = TRUE
 )
 }
@@ -38,6 +39,8 @@ createVCFplot(
 \item{ORDERED}{(optional) if user want to have ordered variant height in the plot or random (if value NOT specified)}
 
 \item{CHR_NAMES}{(optional) vector with chromosme names to plot}
+
+\item{CHR_Y}{(optional) extend the analysis to chrY}
 
 \item{VERBOSE}{(optional) if you want steps printed to stdout}
 }
