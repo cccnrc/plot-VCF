@@ -20,65 +20,73 @@ The rest of dependencies you need will be installed directly with `plotVCF`: tha
 
 # Run plotVCF
 To use `plotVCF` you only need to point it to your VCF file.
-
 Then just call the `createVCFplot()` funtion on them and you will get your Manhattan VCF plot out!
+
+As example, if you are in the `plot-VCF` downloaded with this github repo, you can use our example VCF file:
 ```
 library(plotVCF)
 
-VCF <- <path-to-your-VCF-file>
+VCF <- './inst/extdata/exampleVCF.vcf.gz'
 
 createVCFplot( VCF )
 ```
-## FASTA file
-To use `plotVCF()` you need a [FASTA file](https://en.wikipedia.org/wiki/FASTA_format) to let the software know chromosome boundaries etc.
-
-You need to use the same FASTA format on which your VCF was aligned to. If you are not sure what are we talking about you should find this information in your [VCF header](https://samtools.github.io/hts-specs/VCFv4.2.pdf). In the examples below I used a [hg38](https://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.26/) aligned VCF. Thus, if you wish to reproduce the plots shown below [download a hg38 FASTA](https://www.gungorbudak.com/blog/2018/05/16/how-to-download-hg38-grch38-fasta-human-reference-genome/)!
-
-***Important***: make sure the chromosome names in your FASTA file exactly match chromosome names in your VCF file! (e.g. you can find VCF with `chr1` name format while FASTA may have `1` name format or reversal. Those *VCF and FASTA chromosome names must match!*)
+You can use both `.vcf` and [bgzipped](http://www.htslib.org/doc/bgzip.html) `.vcf.gz` files!
 
 # plotVCF usage
 Let's have a look on how many different things you can achieve with this package!
 
 All plots in examples below are generated from the same VCF file, that you can find (compressed) [here](inst/extdata/exampleVCF.vcf.gz).
-***Important***: you need to decompress it first!
-```
-gzip -d inst/extdata/exampleVCF.vcf.gz
-```
 ## basic visualization plot
-The default behavior of `plotVCF()` is to allow visualization of variants position. It will create random Y-values for variants just to allow their visualization:
+The default behavior of `createVCFplot()` is to allow visualization of variants position. It will create random Y-values for variants just to allow their visualization:
 ```
-VCF <- inst/extdata/exampleVCF.vcf.gz
-FASTA <- <path-to-your-FASTA-file>
-
-createVCFplot( VCF, FASTA )
+createVCFplot( VCF )
 ```
 ![plotVCF() basic plot](plots/plotVCF.base.png)
 ## basic visualization plot - ordered
 You can also choose to order your variants based on sample representation, this will allow you to graphically represent variant number differences across different chromosomes:
 ```
-createVCFplot( VCF, FASTA, ORDERED=TRUE )
+createVCFplot( VCF, ORDERED=TRUE )
 ```
 ![plotVCF() ordered plot](plots/plotVCF.ordered.png)
 ## user-defined visualization plot
-You can specify any numerical VCF variant flag (make sure you have that flag in your VCF) to use as Y-axis in your plot. This creates a sort of Manhattan VCF plot, based on that value.
+You can specify any numerical VCF variant flag (make sure you have that flag specified in your VCF header) to use as Y-axis in your plot. This creates a sort of Manhattan VCF plot, based on that value.
 
 In this example, I used `QUAL` flag of my variants as Y-axis coordinate:
 ```
-createVCFplot( VCF, FASTA, VAR_FLAG="QUAL" )
+createVCFplot( VCF, VAR_FLAG="QUAL" )
 ```
 ![plotVCF() var-flag plot](plots/plotVCF.flag.png)
 ## user-defined visualization plot - threshold
 You can also use a threshold that will be plotted on your Y-axis defined flag (such as you do with significance in a Manhattan plot):
 ```
-createVCFplot( VCF, FASTA, VAR_FLAG="QUAL", THRESHOLD=22000 )
+createVCFplot( VCF, VAR_FLAG="QUAL", THRESHOLD=22000 )
 ```
 ![plotVCF() var-flag threshold plot](plots/plotVCF.flag-threshold.png)
-## focused plot
+## user-defined visualization plot - Y-axis
+You can also use specify a threshold as Y-axis base. As example, in case you want to plot only positions >10000 QUAL:
+```
+createVCFplot( VCF, VAR_FLAG="QUAL", THRESHOLD=22000, XLIM=10000 )
+```
+![plotVCF() var-flag threshold Y-lim plot](plots/plotVCF.flag-threshold-ylim.png)
+## position focused plot
 If you wish to graphically analyze just some chromosomes, you can use `CHR_NAMES` flag:
 ```
-createVCFplot( VCF, FASTA, VAR_FLAG="QUAL", CHR_NAMES=c("chr3","chr4","chr5","chr13","chr19","chrX") )
+createVCFplot( VCF, VAR_FLAG="QUAL", CHR_NAMES=c("chr3","chr4","chr5","chr13","chr19","chrX") )
 ```
 ![plotVCF() var-flag focused plot](plots/plotVCF.flag-focus.png)
+## sample focused plot
+You can also restrict your plot to some specific sample. Just use `SAMPLE` flag.
+It takes both single samples (e.g. `EX01`) and multiple samples (e.g. `c( 'EX01', 'EX02', 'EX05' )`):
+```
+createVCFplot( VCF, VAR_FLAG="QUAL", SAMPLE=c( 'EX01', 'EX02', 'EX05' ) )
+```
+![plotVCF() sample focused plot](plots/plotVCF.sample-focused.png)
+## sample focused plot - differentiate
+And what about if you want to differentiate each sample variant? Just use `SHAPE` option:
+```
+createVCFplot( VCF, VAR_FLAG="QUAL", SAMPLE=c( 'EX01', 'EX02', 'EX05' ), SHAPE=TRUE )
+```
+![plotVCF() sample focused plot - shape legend](plots/plotVCF.sample-focused-shape.png)
 ## advanced plot
 There are many more combinations you can create with this package, explore all possible values with:
 ```
@@ -91,10 +99,19 @@ Once you created your plot, you can save it with any R graphic function ([png()]
 
 Something I like:
 ```
-VCF_PLOT <- createVCFplot( VCF, FASTA )
+VCF_PLOT <- createVCFplot( VCF )
+PNG_FILE <- <path-to-your-PNG-output>
 
-png( <path-to-your-PNG-output>,  width = 5000, height = 2500, res = 300 )
-VCF_PLOT
+png( PNG_FILE,  width = 5000, height = 2500, res = 300 )
+print(VCF_PLOT)
 whatever <- dev.off()
 ```
 but fell free to use what you wish!
+
+
+## FASTA file
+To use `plotVCF()` with a different assembly than `hg18` or `GRCh37` you need a [FASTA file](https://en.wikipedia.org/wiki/FASTA_format) to let the software know chromosome boundaries etc.
+
+You need to use the same FASTA format on which your VCF was aligned to. If you are not sure what are we talking about you should find this information in your [VCF header](https://samtools.github.io/hts-specs/VCFv4.2.pdf). In the examples below I used a [hg38](https://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.26/) aligned VCF. Thus, if you wish to reproduce the plots shown below [download a hg38 FASTA](https://www.gungorbudak.com/blog/2018/05/16/how-to-download-hg38-grch38-fasta-human-reference-genome/)!
+
+***Important***: make sure the chromosome names in your FASTA file exactly match chromosome names in your VCF file! (e.g. you can find VCF with `chr1` name format while FASTA may have `1` name format or reversal. Those *VCF and FASTA chromosome names must match!*)

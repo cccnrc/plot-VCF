@@ -56,7 +56,7 @@ make_plot <- function(MODELED_VCF, SEQINFO, VAR_Y=FALSE, VAR_FLAG="POS", SHAPE=F
   gr_geno$IND <- factor( gr_geno$IND )
   if ( SHAPE != FALSE ) {
     if ( nlevels(gr_geno$IND) < 6 ) {
-      SHAPE_SCALE <- 15:16+nlevels(gr_geno$IND)
+      SHAPE_SCALE <- 15:(16+nlevels(gr_geno$IND))
     } else {
       SHAPE_SCALE <- 1:nlevels(gr_geno$IND)
     }
