@@ -26,9 +26,8 @@ Then just call the `createVCFplot()` funtion on them and you will get your Manha
 library(plotVCF)
 
 VCF <- <path-to-your-VCF-file>
-FASTA <- <path-to-your-FASTA-file>
 
-createVCFplot( VCF, FASTA )
+createVCFplot( VCF )
 ```
 ## FASTA file
 To use `plotVCF()` you need a [FASTA file](https://en.wikipedia.org/wiki/FASTA_format) to let the software know chromosome boundaries etc.
