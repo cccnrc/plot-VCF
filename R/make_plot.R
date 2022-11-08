@@ -8,9 +8,10 @@
 #' @param VAR_FLAG (optional) the VCF variable to use as Y-axis for the variants
 #' @param THRESHOLD (optional) a threshold line to use as Y-axis
 #' @param XLIM (optional) limits for Y-axis
+#' @param SHAPE (optional) different shape for each sample
 #' @param CHR_NAMES (optional) vector with chromosme names to plot
 #' @return The VCF variant plot
-make_plot <- function(MODELED_VCF, SEQINFO, VAR_Y=FALSE, VAR_FLAG="POS", THRESHOLD=FALSE, XLIM=FALSE, CHR_NAMES=c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22","chrX","chrY")){
+make_plot <- function(MODELED_VCF, SEQINFO, VAR_Y=FALSE, VAR_FLAG="POS", SHAPE=FALSE, THRESHOLD=FALSE, XLIM=FALSE, CHR_NAMES=c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22","chrX","chrY")){
   if ( XLIM != FALSE ) {
     if ( length(XLIM) == 1 ) {
       XLIMITS <- c(XLIM, NA)
@@ -49,13 +50,30 @@ make_plot <- function(MODELED_VCF, SEQINFO, VAR_Y=FALSE, VAR_FLAG="POS", THRESHO
                                       ignore.strand = TRUE, seqinfo = SEQINFO,
                                       seqnames.field = "CHROM", start.field = "POS",
                                       end.field = "POS"))
+  ### specify color palette
   COL <- viridis::viridis(length(CHR_NAMES))
-  VCF_PLOT <- suppressWarnings(suppressMessages(ggbio::plotGrandLinear(gr_geno, ggplot2::aes(y = VAR_Y),
+  ### specify shape palette
+  gr_geno$IND <- factor( gr_geno$IND )
+  if ( SHAPE != FALSE ) {
+    if ( nlevels(gr_geno$IND) < 6 ) {
+      SHAPE_SCALE <- 15:16+nlevels(gr_geno$IND)
+    } else {
+      SHAPE_SCALE <- 1:nlevels(gr_geno$IND)
+    }
+    LEGEND_POS <- "top"
+  } else {
+    SHAPE_SCALE <- rep(19, nlevels(gr_geno$IND))
+    LEGEND_POS <- "none"
+  }
+  ### actually create the plot
+  VCF_PLOT <- suppressWarnings(suppressMessages(ggbio::plotGrandLinear(gr_geno, ggplot2::aes(y = VAR_Y, shape = IND),
                       space.skip = 0.01,
                       xlab = "Chromosome",
-                      ylab = "",
+                      ylab = VAR_FLAG,
                       color = COL) +
                       ggplot2::theme_bw() +
+                      ggplot2::scale_shape_manual(values=SHAPE_SCALE, name = '') +
+                      ggplot2::scale_colour_discrete(guide = "none") +
                       ggplot2::scale_y_continuous(limits = XLIMITS) +
                       # scale_x_discrete(labels = seqinfo) +
                       ggplot2::geom_hline( yintercept=Y_THRESHOLD, linetype="longdash", color = "red", lwd = Y_THRESHOLD_THICKNESS) +
@@ -66,7 +84,7 @@ make_plot <- function(MODELED_VCF, SEQINFO, VAR_Y=FALSE, VAR_FLAG="POS", THRESHO
                             axis.text.y=Y_AXIS_TEXT,
                             axis.title.x=ggplot2::element_blank(),
                             axis.title.y=Y_AXIS_TEXT,
-                            legend.position = "none",
+                            legend.position = LEGEND_POS,
                             #panel.grid.minor=ggplot2::element_blank(),
                             panel.grid.minor.y = ggplot2::element_blank(),
                             panel.grid.major=ggplot2::element_blank())))

@@ -9,6 +9,7 @@ make_plot(
   SEQINFO,
   VAR_Y = FALSE,
   VAR_FLAG = "POS",
+  SHAPE = FALSE,
   THRESHOLD = FALSE,
   XLIM = FALSE,
   CHR_NAMES = c("chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9",
@@ -24,6 +25,8 @@ make_plot(
 \item{VAR_Y}{(optional) the Y-axis coordinates for the variants}
 
 \item{VAR_FLAG}{(optional) the VCF variable to use as Y-axis for the variants}
+
+\item{SHAPE}{(optional) different shape for each sample}
 
 \item{THRESHOLD}{(optional) a threshold line to use as Y-axis}
 

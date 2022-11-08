@@ -8,13 +8,53 @@
 #' @param SAMPLE (optional) samples to plot (default is all samples in VCF file)
 #' @param XLIM (optional) limits for Y-axis
 #' @param VAR_FLAG (optional) the VCF variable to use as Y-axis for the variants, default is just position
+#' @param SHAPE (optional) different shape for each sample
 #' @param THRESHOLD (optional) a threshold line to use as Y-axis
 #' @param ORDERED (optional) if user want to have ordered variant height in the plot or random (if value NOT specified)
 #' @param CHR_NAMES (optional) vector with chromosme names to plot
 #' @param VERBOSE (optional) if you want steps printed to stdout
 #' @return the plot
 #' @export
-createVCFplot <- function(VCF_FILE, FASTA_FILE, ASSEMBLY="hg38", VAR_FLAG="POS", SAMPLE="ALL", XLIM=FALSE, THRESHOLD=FALSE, ORDERED=FALSE, CHR_NAMES=c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22","chrX","chrY"), VERBOSE=TRUE){
+createVCFplot <- function(VCF_FILE, FASTA_FILE = FALSE, ASSEMBLY="hg38", VAR_FLAG="POS", SHAPE=FALSE, SAMPLE="ALL", XLIM=FALSE, THRESHOLD=FALSE, ORDERED=FALSE, CHR_NAMES=FALSE, VERBOSE=TRUE){
+  ### check ASSEMBLY or CHR_NAMES are specified
+  if ( CHR_NAMES == FALSE ) {
+    if ( ASSEMBLY == 'hg38' ) {
+      CHR_NAMES <- c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22","chrX","chrY")
+    }
+    else if ( ASSEMBLY == 'GRCh37' ) {
+      CHR_NAMES <- c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "X", "Y", "MT")
+    } else {
+      cat(' -> please specify either default assembly (hg38/GRCh37) or CHR_NAMES to plot! (see documentation)...\n')
+      stop()
+    }
+  }
+  ### output passed arguments
+  cat('\n')
+  cat('---------------------------------------------------------------------------\n')
+  cat('------------------------>   plotVCF v0.0.0.9000   <------------------------\n')
+  cat('---------------------------------------------------------------------------\n')
+  cat('    -> input VCF file:', '\t', VCF_FILE, '\n' )
+  cat('    -> input assembly:', '\t', ASSEMBLY, '\n' )
+  cat('    -> input chromos:', '\t', CHR_NAMES, '\n' )
+  cat('    -> input VAR_FLAG:', '\t', VAR_FLAG, '\n' )
+  cat('    -> input SAMPLE:', '\t', SAMPLE, '\n' )
+  if ( FASTA_FILE != FALSE ) {
+    cat('    -> input FASTA:', '\t', FASTA_FILE, '\n' )
+  }
+  if ( XLIM != FALSE ) {
+    cat('    -> input XLIM:', '\t', XLIM, '\n' )
+  }
+  if ( THRESHOLD != FALSE ) {
+    cat('    -> input thresh:', '\t', THRESHOLD, '\n' )
+  }
+  if ( ORDERED != FALSE ) {
+    cat('    -> input order:', '\t', ORDERED, '\n' )
+  }
+  if ( SHAPE != FALSE ) {
+    cat('    -> input shape:', '\t', SHAPE, '\n' )
+  }
+  cat('---------------------------------------------------------------------------\n')
+  cat('\n')
   ### cannot use VAR_FLAG and ORDERED
   if (( VAR_FLAG != "POS" )&( ORDERED != FALSE )) {
     cat('\n')
@@ -27,10 +67,36 @@ createVCFplot <- function(VCF_FILE, FASTA_FILE, ASSEMBLY="hg38", VAR_FLAG="POS",
   }
   VCF <- load_vcf(VCF_FILE, ASSEMBLY=ASSEMBLY, SAMPLE=SAMPLE, VAR_FLAG=VAR_FLAG)
   VCF <- model_vcf(VCF)
-  if ( VERBOSE == TRUE ) {
-    cat(' -> loading FASTA file ...\n')
+  ### if user specified their own FASTA file use this
+  if ( FASTA_FILE != FALSE ) {
+    if ( VERBOSE == TRUE ) {
+      cat(' -> loading FASTA file ...\n')
+    }
+    SEQ <- load_chr(FASTA_FILE, CHR_NAMES=CHR_NAMES)
+  } else {
+    if ( ASSEMBLY == 'hg38' ) {
+      for ( CHR_NAME in CHR_NAMES )
+      {
+        if ( ! CHR_NAME %in% names(HG38_SEQINFO) ) {
+          cat(' -> ERROR: CHR_NAMES passed are not in default seqinfo for ', ASSEMBLY , ' ...\n')
+          stop()
+        }
+      }
+      SEQ <- HG38_SEQINFO[ CHR_NAMES ]
+    } else if ( ASSEMBLY == 'GRCh37' ) {
+      for ( CHR_NAME in CHR_NAMES )
+      {
+        if ( ! CHR_NAME %in% names(HG37_SEQINFO) ) {
+          cat(' -> ERROR: CHR_NAMES passed are not in default seqinfo for ', ASSEMBLY , ' ...\n')
+          stop()
+        }
+      }
+      SEQ <- HG37_SEQINFO[ CHR_NAMES ]
+    } else {
+      cat(' -> ERROR: at least one default assembly (hg38/GRCh37) or a FASTA_FILE must be specified ...\n')
+      stop()
+    }
   }
-  SEQ <- load_chr(FASTA_FILE, CHR_NAMES=CHR_NAMES)
   if ( VERBOSE == TRUE ) {
     cat(' -> arranging variants ...\n')
   }
@@ -44,6 +110,6 @@ createVCFplot <- function(VCF_FILE, FASTA_FILE, ASSEMBLY="hg38", VAR_FLAG="POS",
     cat(' -> creating the plot ...\n')
     cat('\n')
   }
-  PLOT <- make_plot(VCF, SEQ, VAR_FLAG=VAR_FLAG, THRESHOLD=THRESHOLD, VAR_Y=VAR_Y, CHR_NAMES=CHR_NAMES, XLIM=XLIM)
+  PLOT <- make_plot(VCF, SEQ, VAR_FLAG=VAR_FLAG, THRESHOLD=THRESHOLD, VAR_Y=VAR_Y, CHR_NAMES=CHR_NAMES, XLIM=XLIM, SHAPE=SHAPE)
   PLOT
 }

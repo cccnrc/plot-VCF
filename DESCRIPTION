@@ -16,5 +16,7 @@ Imports:
   Biostrings (>= 2.64.1),
   ggbio (>= 1.44.1),
 Depends:
-  VariantAnnotation (>= 1.42.1),
-  dplyr
+    VariantAnnotation (>= 1.42.1),
+    dplyr,
+    R (>= 2.10)
+LazyData: true

@@ -6,8 +6,10 @@
 #' @return modified dataframe
 model_vcf <- function(VCF_DATA){
   VCF_COLNAMES <- colnames(VCF_DATA)
-  SAMPLE_NAMES <- VCF_COLNAMES[10:length(VCF_COLNAMES)]
-  GENO_DATA <- VCF_DATA[, 1:7]
+  ### extract sample names from VCF_DATA
+  SAMPLE_NAMES <- VCF_COLNAMES[5:length(VCF_COLNAMES)]
+  GENO_DATA <- VCF_DATA[, 1:4]
+  ### create the first sample column
   SAMPLE <- SAMPLE_NAMES[1]
   SAMPLE_COL <- rep( SAMPLE, nrow( GENO_DATA ) )
   SAMPLE_DATA <- cbind( SAMPLE_COL, GENO_DATA, VCF_DATA[ ,SAMPLE ] )
@@ -17,13 +19,15 @@ model_vcf <- function(VCF_DATA){
   SAMPLE_DATA_COLNAMES[length(SAMPLE_DATA_COLNAMES)] <- 'GT'
   colnames(SAMPLE_DATA) <- SAMPLE_DATA_COLNAMES
   SAMPLE_GT <- SAMPLE_DATA
-
-  for (SAMPLE in SAMPLE_NAMES[2:length(SAMPLE_NAMES)])
-  {
-    SAMPLE_COL <- rep( SAMPLE, nrow( GENO_DATA ) )
-    SAMPLE_DATA <- cbind( SAMPLE_COL, GENO_DATA, VCF_DATA[ ,SAMPLE ] )
-    colnames(SAMPLE_DATA) <- SAMPLE_DATA_COLNAMES
-    SAMPLE_GT <- rbind( SAMPLE_GT, SAMPLE_DATA )
+  ### add the rest of samples (if present)
+  if ( length(SAMPLE_NAMES) > 1 ) {
+    for (SAMPLE in SAMPLE_NAMES[2:length(SAMPLE_NAMES)])
+    {
+      SAMPLE_COL <- rep( SAMPLE, nrow( GENO_DATA ) )
+      SAMPLE_DATA <- cbind( SAMPLE_COL, GENO_DATA, VCF_DATA[ ,SAMPLE ] )
+      colnames(SAMPLE_DATA) <- SAMPLE_DATA_COLNAMES
+      SAMPLE_GT <- rbind( SAMPLE_GT, SAMPLE_DATA )
+    }
   }
 
   ### remove rows with null GT
