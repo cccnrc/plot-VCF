@@ -11,11 +11,13 @@ createVCFplot(
   VAR_FLAG = "POS",
   SHAPE = FALSE,
   SAMPLE = "ALL",
+  COLOR_SAMPLE = FALSE,
   XLIM = FALSE,
   THRESHOLD = FALSE,
   ORDERED = FALSE,
   CHR_NAMES = FALSE,
   CHR_Y = FALSE,
+  SPACELINE = FALSE,
   VERBOSE = TRUE
 )
 }
@@ -32,6 +34,8 @@ createVCFplot(
 
 \item{SAMPLE}{(optional) samples to plot (default is all samples in VCF file)}
 
+\item{COLOR_SAMPLE}{(optional) list with groups and names of sample to color in the final plot}
+
 \item{XLIM}{(optional) limits for Y-axis}
 
 \item{THRESHOLD}{(optional) a threshold line to use as Y-axis}
@@ -41,6 +45,8 @@ createVCFplot(
 \item{CHR_NAMES}{(optional) vector with chromosme names to plot}
 
 \item{CHR_Y}{(optional) extend the analysis to chrY}
+
+\item{SPACELINE}{(optional) show line between chromosomes}
 
 \item{VERBOSE}{(optional) if you want steps printed to stdout}
 }

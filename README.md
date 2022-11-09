@@ -1,7 +1,7 @@
 How many times you hoped to easily plot variants in yout VCF files in order to operate a fast visual analysis on them?!
 It happened to me soo many times...and this is exactly why we created this R package for you! :wink:
 
-Let's a brief look at how it works
+Let's take a brief look at how it works
 
 # Install plotVCF
 Installing `plotVCF` is as simple as:
@@ -55,6 +55,12 @@ In this example, I used `QUAL` flag of my variants as Y-axis coordinate:
 createVCFplot( VCF, VAR_FLAG="QUAL" )
 ```
 ![plotVCF() var-flag plot](plots/plotVCF.flag.png)
+## user-defined visualization plot - chromosome lines
+You can also put a line to separate each exact chromosome border. Just use `SPACELINE` option:
+```
+createVCFplot( VCF, VAR_FLAG="QUAL", THRESHOLD=22000, SPACELINE=TRUE )
+```
+![plotVCF() var-flag spaceline plot](plots/plotVCF.flag-spaceline.png)
 ## user-defined visualization plot - threshold
 You can also use a threshold that will be plotted on your Y-axis defined flag (such as you do with significance in a Manhattan plot):
 ```
@@ -86,6 +92,20 @@ And what about if you want to differentiate each sample variant? Just use `SHAPE
 createVCFplot( VCF, VAR_FLAG="QUAL", SAMPLE=c( 'EX01', 'EX02', 'EX05' ), SHAPE=TRUE )
 ```
 ![plotVCF() sample focused plot - shape legend](plots/plotVCF.sample-focused-shape.png)
+## sample focused plot - color groups
+Is not that easy to separate each sample variant in the plot above. What about playing with colors to help us out?
+You can specifify a [list](https://www.tutorialspoint.com/r/r_lists.htm) to specify which sample pertains to which group and have different groups plotted in different colors (as example case vs. controls)! Take a look at `COLOR_SAMPLE` magic option on our [example VCF](inst/extdata/exampleVCF.vcf.gz):
+```
+COLOR_SAMPLE <- list(
+                    "groupA" = "EX01",
+                    "groupB" = c( "EX02", "EX05" ),
+                    "groupC" = c( "EX03", "EX04", "EX06" )
+                    )
+
+createVCFplot( VCF, VAR_FLAG="QUAL", COLOR_SAMPLE=COLOR_SAMPLE )
+```
+![plotVCF() sample focused plot - color group](plots/plotVCF.sample-focused-group.png)
+We love it! Hope you will too :blink:
 ## advanced plot
 There are many more combinations you can create with this package, explore all possible values with:
 ```
@@ -111,6 +131,6 @@ but fell free to use what you wish!
 ## FASTA file
 To use `plotVCF()` with a different assembly than `hg18` or `GRCh37` you need a [FASTA file](https://en.wikipedia.org/wiki/FASTA_format) to let the software know chromosome boundaries etc.
 
-You need to use the same FASTA format on which your VCF was aligned to. If you are not sure what are we talking about you should find this information in your [VCF header](https://samtools.github.io/hts-specs/VCFv4.2.pdf). In the examples below I used a [hg38](https://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.26/) aligned VCF. Thus, if you wish to reproduce the plots shown below [download a hg38 FASTA](https://www.gungorbudak.com/blog/2018/05/16/how-to-download-hg38-grch38-fasta-human-reference-genome/)!
+You need to use the same FASTA format on which your VCF was aligned to. If you are not sure what are we talking about you should find this information in your [VCF header](https://samtools.github.io/hts-specs/VCFv4.2.pdf). In the examples below I used a [hg38](https://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.26/) aligned VCF, which is `plotVCF()` default assembly.
 
 ***Important***: make sure the chromosome names in your FASTA file exactly match chromosome names in your VCF file! (e.g. you can find VCF with `chr1` name format while FASTA may have `1` name format or reversal. Those *VCF and FASTA chromosome names must match!*)

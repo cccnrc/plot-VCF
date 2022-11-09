@@ -9,7 +9,9 @@ make_plot(
   SEQINFO,
   VAR_Y = FALSE,
   VAR_FLAG = "POS",
+  SPACELINE = FALSE,
   SHAPE = FALSE,
+  SAMPLE_DB = FALSE,
   THRESHOLD = FALSE,
   XLIM = FALSE,
   CHR_NAMES = c("chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9",
@@ -26,7 +28,11 @@ make_plot(
 
 \item{VAR_FLAG}{(optional) the VCF variable to use as Y-axis for the variants}
 
+\item{SPACELINE}{(optional) show line between chromosomes}
+
 \item{SHAPE}{(optional) different shape for each sample}
+
+\item{SAMPLE_DB}{(optional) 2-column dataframe with sample-group to color plot accordingly}
 
 \item{THRESHOLD}{(optional) a threshold line to use as Y-axis}
 

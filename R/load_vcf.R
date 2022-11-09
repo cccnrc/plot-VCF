@@ -84,8 +84,6 @@ load_vcf <- function( VCF_FILE, SEQINFO, ASSEMBLY="hg38", SAMPLE="ALL", VAR_FLAG
     }
     cat( "    -> all specified samples", paste("(n. ", length(SAMPLE), ")", sep = ''), "in VCF!\n" )
   }
-
-
   ### if user wants POS do not need to store the rest of database
   if ( VAR_FLAG != "POS" ) {
     if ( VAR_FLAG == "QUAL" ) {

@@ -6,6 +6,7 @@
 #' @param FASTA_FILE Path to the input FASTA file
 #' @param ASSEMBLY (optional) which assembly your VCF is (hg38/hg19)
 #' @param SAMPLE (optional) samples to plot (default is all samples in VCF file)
+#' @param COLOR_SAMPLE (optional) list with groups and names of sample to color in the final plot
 #' @param XLIM (optional) limits for Y-axis
 #' @param VAR_FLAG (optional) the VCF variable to use as Y-axis for the variants, default is just position
 #' @param SHAPE (optional) different shape for each sample
@@ -13,10 +14,11 @@
 #' @param ORDERED (optional) if user want to have ordered variant height in the plot or random (if value NOT specified)
 #' @param CHR_NAMES (optional) vector with chromosme names to plot
 #' @param CHR_Y (optional) extend the analysis to chrY
+#' @param SPACELINE (optional) show line between chromosomes
 #' @param VERBOSE (optional) if you want steps printed to stdout
 #' @return the plot
 #' @export
-createVCFplot <- function(VCF_FILE, FASTA_FILE = FALSE, ASSEMBLY="hg38", VAR_FLAG="POS", SHAPE=FALSE, SAMPLE="ALL", XLIM=FALSE, THRESHOLD=FALSE, ORDERED=FALSE, CHR_NAMES=FALSE, CHR_Y=FALSE, VERBOSE=TRUE){
+createVCFplot <- function(VCF_FILE, FASTA_FILE = FALSE, ASSEMBLY="hg38", VAR_FLAG="POS", SHAPE=FALSE, SAMPLE="ALL", COLOR_SAMPLE=FALSE, XLIM=FALSE, THRESHOLD=FALSE, ORDERED=FALSE, CHR_NAMES=FALSE, CHR_Y=FALSE, SPACELINE=FALSE, VERBOSE=TRUE){
   ### check ASSEMBLY or CHR_NAMES are specified
   if ( length(CHR_NAMES) == 1 ) {
     if ( CHR_NAMES == FALSE ) {
@@ -36,6 +38,12 @@ createVCFplot <- function(VCF_FILE, FASTA_FILE = FALSE, ASSEMBLY="hg38", VAR_FLA
         stop()
       }
     }
+  }
+  ### check COLOR_SAMPLE if passed
+  if ( length(COLOR_SAMPLE) > 1 ) {
+    SAMPLE_DB <- adapt_color_sample( COLOR_SAMPLE, SAMPLE )
+    SAMPLE <- SAMPLE_DB$SAM
+    SAMPLE_GROUP <- SAMPLE_DB$GROUP
   }
   ### output passed arguments
   cat('\n')
@@ -64,6 +72,9 @@ createVCFplot <- function(VCF_FILE, FASTA_FILE = FALSE, ASSEMBLY="hg38", VAR_FLA
   }
   if ( CHR_Y != FALSE ) {
     cat('    -> input chrY:', '\t', CHR_Y, '\n' )
+  }
+  if ( length(COLOR_SAMPLE) > 0 ) {
+    cat('    -> COLOR_SAMPLE:', '\t', length(COLOR_SAMPLE), 'groups specified\n' )
   }
   cat('---------------------------------------------------------------------------\n')
   cat('\n')
@@ -122,9 +133,14 @@ createVCFplot <- function(VCF_FILE, FASTA_FILE = FALSE, ASSEMBLY="hg38", VAR_FLA
   }
   if ( VERBOSE == TRUE ) {
     cat(' -> creating the plot ...\n')
-    cat('\n')
   }
-  PLOT <- make_plot(VCF, SEQ, VAR_FLAG=VAR_FLAG, THRESHOLD=THRESHOLD, VAR_Y=VAR_Y, CHR_NAMES=CHR_NAMES, XLIM=XLIM, SHAPE=SHAPE)
+  if ( (exists("SAMPLE_DB")) && ( is.data.frame(get('SAMPLE_DB')) ) ) {
+    SAMPLE_DB <- SAMPLE_DB
+  } else {
+    SAMPLE_DB <- FALSE
+  }
+  PLOT <- make_plot(VCF, SEQ, VAR_FLAG=VAR_FLAG, SAMPLE_DB=SAMPLE_DB, THRESHOLD=THRESHOLD, VAR_Y=VAR_Y, CHR_NAMES=CHR_NAMES, XLIM=XLIM, SHAPE=SHAPE, SPACELINE=SPACELINE)
+  cat('\n')
   cat('---------------------------------------------------------------------------\n')
   PLOT
 }
