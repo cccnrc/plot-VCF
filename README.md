@@ -106,7 +106,7 @@ COLOR_SAMPLE <- list(
 createVCFplot( VCF, VAR_FLAG="QUAL", COLOR_SAMPLE=COLOR_SAMPLE )
 ```
 ![plotVCF() sample focused plot - color group](plots/plotVCF.sample-focused-group.png)
-We love it! Hope you will too :blink:
+We love it! Hope you will too :wink:
 ## advanced plot
 There are many more combinations you can create with this package, explore all possible values with:
 ```
