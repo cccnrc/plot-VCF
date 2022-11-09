@@ -94,7 +94,7 @@ createVCFplot( VCF, VAR_FLAG="QUAL", SAMPLE=c( 'EX01', 'EX02', 'EX05' ), SHAPE=T
 ![plotVCF() sample focused plot - shape legend](plots/plotVCF.sample-focused-shape.png)
 ## sample focused plot - color groups
 Is not that easy to separate each sample variant in the plot above. What about playing with colors to help us out?
-You can pass a [list](https://www.tutorialspoint.com/r/r_lists.htm) to specify which sample pertains to which group (as example: case vs. controls) and have different groups plotted in different colors!
+You can pass a [list](https://www.tutorialspoint.com/r/r_lists.htm) to specify which sample pertains to which group (as example: *cases* vs. *controls*) and have different groups plotted in different colors!
 Take a look at `COLOR_SAMPLE` magic option on our [example VCF](inst/extdata/exampleVCF.vcf.gz):
 ```
 COLOR_SAMPLE <- list(
