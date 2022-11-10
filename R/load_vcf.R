@@ -28,7 +28,7 @@ load_vcf <- function( VCF_FILE, SEQINFO, ASSEMBLY="hg38", SAMPLE="ALL", VAR_FLAG
     return( tab )
   }
   getVCFchr <- function ( VCF_GZ ) {
-    CHR_VCF_GZ <- Rsamtools::headerTabix( VCF_FILE )$seqnames
+    CHR_VCF_GZ <- Rsamtools::headerTabix( VCF_GZ, "vcf" )$seqnames
     return(CHR_VCF_GZ)
   }
   getPARAM <- function( CHR_NAMES, SEQINFO, SAMPLE ) {
@@ -40,17 +40,68 @@ load_vcf <- function( VCF_FILE, SEQINFO, ASSEMBLY="hg38", SAMPLE="ALL", VAR_FLAG
     }
     return( PARAM )
   }
+  calculateAF <- function( VCF_DATA, SAMPLE ) {
+    GH <- data.frame(geno(header(VCF_DATA)))
+    GHE <- GH[ GH[,'Type'] == "Integer" & GH[,'Number'] == 1, ]
+    GHE_FLOAT <- GH[ GH[,'Type'] == "Float", ]
+    if ( ( "AD" %in% rownames(GH) ) && ( "DP" %in% rownames(GHE) ) ) {
+      if (( length(SAMPLE) > 1 ) || ( SAMPLE != "ALL" )) {
+        if ( length(SAMPLE) > 1 ) {
+          TMP_DB_AD <- data.frame(geno(VCF_DATA)[["AD"]])[,SAMPLE]
+          TMP_DB_DP <- data.frame(geno(VCF_DATA)[["DP"]])[,SAMPLE]
+        } else {
+          AD_VEC <- vector()
+          for ( VAL in data.frame(geno(VCF_DATA)[["AD"]])[,SAMPLE] ) {
+            AD_VEC <- c(AD_VEC, VAL[length(VAL)])
+          }
+          TMP_DB_AD <- data.frame( "SAMPLE" = AD_VEC )
+          TMP_DB_DP <- data.frame( "DP" = data.frame(geno(VCF_DATA)[["DP"]])[,SAMPLE] )
+        }
+      } else {
+        TMP_DB_AD <- data.frame(geno(VCF_DATA)[["AD"]])
+        TMP_DB_DP <- data.frame(geno(VCF_DATA)[["DP"]])
+      }
+      AF_LIST <- list()
+      for ( c in 1:ncol( TMP_DB_AD ) )
+      {
+        SAMPLE_AF <- vector()
+        for ( i in 1:nrow(TMP_DB_AD) )
+        {
+          AD_VALUES <- TMP_DB_AD[i,c][[1]]
+          AD_ALT <- as.numeric(AD_VALUES[ length(AD_VALUES) ])
+          AF_VALUE <- AD_ALT/as.numeric(TMP_DB_DP[i,c])
+          SAMPLE_AF <- c(SAMPLE_AF, AF_VALUE)
+        }
+        AF_LIST[[c]] <- SAMPLE_AF
+      }
+      names( AF_LIST ) <- colnames( TMP_DB_AD )
+      TMP_DB_AF <- data.frame(AF_LIST)
+      if (( length(SAMPLE) > 1 ) || ( SAMPLE == "ALL" )) {
+        TMP_COL_AF <- apply(TMP_DB_AF,1,function(v) median(as.numeric(v),na.rm = T))
+      } else {
+        TMP_COL_AF <- as.numeric(TMP_DB_AF[,1])
+      }
+      VAR_COL <- data.frame( "AF" = as.numeric(TMP_COL_AF) )
+      cat( "      -> VAR_FLAG column: AF calculated from AD/DP ...\n" )
+    } else {
+      stop("      -> can not calculate AF! AD and/or DP absent from VCF file ...")
+    }
+    return(VAR_COL)
+  }
+
   ### compress and index file (if not done yet)
   VCF_EXT <- getExtension(VCF_FILE)
   if (( VCF_EXT == "vcf" ) || ( VCF_EXT == "VCF" )) {
+    #cat(' -> passed file is .vcf Compressing and indexing it ...\n')
     VCF_GZ <- compressVCF( VCF_FILE )
     VCF_TAB <- indexVCFGZ( VCF_GZ )
     ### check and get chromosmes actually in VCF file
     VCF_CHR_NAMES <- getVCFchr( VCF_GZ )
   } else if (( VCF_EXT == "gz" ) || ( VCF_EXT == "GZ" )) {
+    #cat(' -> passed file is .vcf.gz Indexing it ...\n')
     VCF_TAB <- indexVCFGZ( VCF_FILE )
     ### check and get chromosmes actually in VCF file
-    VCF_CHR_NAMES <- getVCFchr( VCF_GZ )
+    VCF_CHR_NAMES <- getVCFchr( VCF_FILE )
   } else {
     cat('\n')
     cat(' -> passed VCF file is neither .vcf or .vcf.gz! (see documentation)...\n')
@@ -93,7 +144,8 @@ load_vcf <- function( VCF_FILE, SEQINFO, ASSEMBLY="hg38", SAMPLE="ALL", VAR_FLAG
       ### select genotype columns that are numeric with single data
       GH <- data.frame(geno(header(VCF_DATA)))
       GHE <- GH[ GH[,'Type'] == "Integer" & GH[,'Number'] == 1, ]
-      if ( VAR_FLAG %in% rownames(GHE) ) {
+      GHE_FLOAT <- GH[ GH[,'Type'] == "Float", ]
+      if (( VAR_FLAG %in% rownames(GHE) )||( VAR_FLAG %in% rownames(GHE_FLOAT) )) {
         ### get flag number
         NAME <- VAR_FLAG
         if (( length(SAMPLE) > 1 ) || ( SAMPLE != "ALL" )) {
@@ -110,6 +162,11 @@ load_vcf <- function( VCF_FILE, SEQINFO, ASSEMBLY="hg38", SAMPLE="ALL", VAR_FLAG
         colnames(TMP_COL_DB) <- NAME
         VAR_COL <- TMP_COL_DB
         cat( "      -> VAR_FLAG column:", NAME, "found and loaded...\n" )
+      } else {
+        ### if VAR_FLAG is AF and it is absent from VCF calculate it from AD adn DP
+        if ( VAR_FLAG == "AF" ) {
+          VAR_COL <- calculateAF( VCF_DATA, SAMPLE )
+        }
       }
     }
   }
