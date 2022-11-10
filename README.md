@@ -55,7 +55,7 @@ In this example, I used `QUAL` flag of my variants as Y-axis coordinate:
 createVCFplot( VCF, VAR_FLAG="QUAL" )
 ```
 ![plotVCF() var-flag plot](plots/plotVCF.flag.png)
-This can be of great utility! Let's say you're dealing with **somatic** variants. You surely would be happy to take a look at [Variant Allele Fraction](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4850126/#__sec8title) spanned over your samples/chromosomes. This is pretty easy: just specify `AF` in the `VAR_FLAG` option:
+This can be of great utility! Let's say you're dealing with **somatic** variants. You surely would be happy to take a look at [Variant Allele Fraction](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4850126/#__sec8title) spanned over your samples/chromosomes (to rapidly identify regions/sample with a higher burden of mutations etc.). This is pretty easy: just specify `AF` in the `VAR_FLAG` option:
 ![plotVCF() var-flag VAF plot](plots/plotVCF.flag-AF.png)
 You can use this `AF` flag when dealing with **germline** variants as well: `plotVCF()` will calculate it for you (considering Alternate Allele Read Depth / Total Read Depth, that you generally have in .vcf files)
 ## user-defined visualization plot - chromosome lines
