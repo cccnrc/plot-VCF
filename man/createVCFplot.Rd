@@ -10,6 +10,7 @@ createVCFplot(
   ASSEMBLY = "hg38",
   VAR_FLAG = "POS",
   SHAPE = FALSE,
+  GENE = FALSE,
   SAMPLE = "ALL",
   COLOR_SAMPLE = FALSE,
   XLIM = FALSE,
@@ -31,6 +32,8 @@ createVCFplot(
 \item{VAR_FLAG}{(optional) the VCF variable to use as Y-axis for the variants, default is just position}
 
 \item{SHAPE}{(optional) different shape for each sample}
+
+\item{GENE}{(optional) genes to focus the plot on}
 
 \item{SAMPLE}{(optional) samples to plot (default is all samples in VCF file)}
 

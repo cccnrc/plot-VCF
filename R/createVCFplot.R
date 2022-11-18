@@ -5,6 +5,7 @@
 #' @param VCF_FILE Path to the input VCF file
 #' @param FASTA_FILE Path to the input FASTA file
 #' @param ASSEMBLY (optional) which assembly your VCF is (hg38/hg19)
+#' @param GENE (optional) genes to focus the plot on
 #' @param SAMPLE (optional) samples to plot (default is all samples in VCF file)
 #' @param COLOR_SAMPLE (optional) list with groups and names of sample to color in the final plot
 #' @param XLIM (optional) limits for Y-axis
@@ -18,7 +19,7 @@
 #' @param VERBOSE (optional) if you want steps printed to stdout
 #' @return the plot
 #' @export
-createVCFplot <- function(VCF_FILE, FASTA_FILE = FALSE, ASSEMBLY="hg38", VAR_FLAG="POS", SHAPE=FALSE, SAMPLE="ALL", COLOR_SAMPLE=FALSE, XLIM=FALSE, THRESHOLD=FALSE, ORDERED=FALSE, CHR_NAMES=FALSE, CHR_Y=FALSE, SPACELINE=FALSE, VERBOSE=TRUE){
+createVCFplot <- function(VCF_FILE, FASTA_FILE = FALSE, ASSEMBLY="hg38", VAR_FLAG="POS", SHAPE=FALSE, GENE=FALSE, SAMPLE="ALL", COLOR_SAMPLE=FALSE, XLIM=FALSE, THRESHOLD=FALSE, ORDERED=FALSE, CHR_NAMES=FALSE, CHR_Y=FALSE, SPACELINE=FALSE, VERBOSE=TRUE){
   ### check ASSEMBLY or CHR_NAMES are specified
   if ( length(CHR_NAMES) == 1 ) {
     if ( CHR_NAMES == FALSE ) {
@@ -44,6 +45,14 @@ createVCFplot <- function(VCF_FILE, FASTA_FILE = FALSE, ASSEMBLY="hg38", VAR_FLA
     SAMPLE_DB <- adapt_color_sample( COLOR_SAMPLE, SAMPLE )
     SAMPLE <- SAMPLE_DB$SAM
     SAMPLE_GROUP <- SAMPLE_DB$GROUP
+  }
+  ### check GENE if passed
+  if ( !is.logical(get('GENE')) ) {
+    ### extract genes GRanges
+    GENE_GR <- GENES38[ GENES38$symbol %in% GENE ]
+    names( GENE_GR ) <- GENE_GR$symbol
+    seqlevels( GENE_GR ) <- seqlevelsInUse(GENE_GR)
+    IDENTIFIED_GENES <- names(GENE_GR)
   }
   ### output passed arguments
   cat('\n')
@@ -72,6 +81,11 @@ createVCFplot <- function(VCF_FILE, FASTA_FILE = FALSE, ASSEMBLY="hg38", VAR_FLA
   }
   if ( CHR_Y != FALSE ) {
     cat('    -> input chrY:', '\t', CHR_Y, '\n' )
+  }
+  if ( !is.logical(get('GENE')) ) {
+    cat('    -> input gene(s):', '\t', GENE, '\n' )
+    cat('    -> found gene(s):', '\t', IDENTIFIED_GENES, '\n' )
+    print( GENE_GR )
   }
   if ( length(COLOR_SAMPLE) > 0 ) {
     cat('    -> COLOR_SAMPLE:', '\t', length(COLOR_SAMPLE), 'groups specified\n' )
@@ -139,7 +153,12 @@ createVCFplot <- function(VCF_FILE, FASTA_FILE = FALSE, ASSEMBLY="hg38", VAR_FLA
   } else {
     SAMPLE_DB <- FALSE
   }
-  PLOT <- make_plot(VCF, SEQ, VAR_FLAG=VAR_FLAG, SAMPLE_DB=SAMPLE_DB, THRESHOLD=THRESHOLD, VAR_Y=VAR_Y, CHR_NAMES=CHR_NAMES, XLIM=XLIM, SHAPE=SHAPE, SPACELINE=SPACELINE)
+  if ( (exists("GENE_GR")) && ( length(get('GENE_GR'))>0 ) && ( !is.logical(get('GENE_GR'))) ) {
+    GENE_GR <- GENE_GR
+  } else {
+    GENE_GR <- FALSE
+  }
+  PLOT <- make_plot(VCF, SEQ, VAR_FLAG=VAR_FLAG, GENE_GR=GENE_GR, SAMPLE_DB=SAMPLE_DB, THRESHOLD=THRESHOLD, VAR_Y=VAR_Y, CHR_NAMES=CHR_NAMES, XLIM=XLIM, SHAPE=SHAPE, SPACELINE=SPACELINE)
   cat('\n')
   cat('---------------------------------------------------------------------------\n')
   PLOT

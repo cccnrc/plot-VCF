@@ -11,6 +11,7 @@ make_plot(
   VAR_FLAG = "POS",
   SPACELINE = FALSE,
   SHAPE = FALSE,
+  GENE_GR = FALSE,
   SAMPLE_DB = FALSE,
   THRESHOLD = FALSE,
   XLIM = FALSE,
@@ -31,6 +32,8 @@ make_plot(
 \item{SPACELINE}{(optional) show line between chromosomes}
 
 \item{SHAPE}{(optional) different shape for each sample}
+
+\item{GENE_GR}{(optional) GRanges object of genes to focus the plot on}
 
 \item{SAMPLE_DB}{(optional) 2-column dataframe with sample-group to color plot accordingly}
 

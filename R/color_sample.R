@@ -25,16 +25,17 @@ adapt_color_sample <- function( COLOR_SAMPLE, SAMPLE ){
       }
       ### put all values in a vector
       COLOR_SAMPLE_VEC <- c( COLOR_SAMPLE_VEC, COLOR_SAMPLE[[i]] )
-      COLOR_SAMPLE_GROUP_VEC <- c( COLOR_SAMPLE_GROUP_VEC, names( COLOR_SAMPLE[i]) )
+      for ( x in 1:length(COLOR_SAMPLE[[i]]) )
+      {
+        COLOR_SAMPLE_GROUP_VEC <- c( COLOR_SAMPLE_GROUP_VEC, names( COLOR_SAMPLE )[i] )
+      }
     }
-    ### remove duplicates in COLOR_SAMPLE
+    COLOR_SAMPLE_DF <- data.frame( "SAM" = COLOR_SAMPLE_VEC, "GROUP" = COLOR_SAMPLE_GROUP_VEC )
+    ### stop if duplicates in COLOR_SAMPLE
     COLOR_SAMPLE_DUP <- COLOR_SAMPLE_VEC[duplicated(COLOR_SAMPLE_VEC)]
     if ( length(COLOR_SAMPLE_DUP) > 0 ) {
       stop(" => duplicated samples passed in COLOR_SAMPLE!")
     }
-    ### if specified, restrict analysis on samples in COLOR_SAMPLE
-    NEW_SAMPLE <- COLOR_SAMPLE_VEC
   }
-  COLOR_SAMPLE_DF <- data.frame( "SAM" = NEW_SAMPLE, "GROUP" = COLOR_SAMPLE_GROUP_VEC )
   return( COLOR_SAMPLE_DF )
 }
