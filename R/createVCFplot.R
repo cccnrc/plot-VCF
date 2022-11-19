@@ -53,6 +53,10 @@ createVCFplot <- function(VCF_FILE, FASTA_FILE = FALSE, ASSEMBLY="hg38", VAR_FLA
     names( GENE_GR ) <- GENE_GR$symbol
     seqlevels( GENE_GR ) <- seqlevelsInUse(GENE_GR)
     IDENTIFIED_GENES <- names(GENE_GR)
+    ### check genes are all on same chromosome
+    if ( length(seqlevels( GENE_GR )) > 1 ) {
+      stop("      -> all genes must be on same chromosome ...")
+    }
   }
   ### output passed arguments
   cat('\n')
@@ -85,7 +89,7 @@ createVCFplot <- function(VCF_FILE, FASTA_FILE = FALSE, ASSEMBLY="hg38", VAR_FLA
   if ( !is.logical(get('GENE')) ) {
     cat('    -> input gene(s):', '\t', GENE, '\n' )
     cat('    -> found gene(s):', '\t', IDENTIFIED_GENES, '\n' )
-    print( GENE_GR )
+    #print( GENE_GR )
   }
   if ( length(COLOR_SAMPLE) > 0 ) {
     cat('    -> COLOR_SAMPLE:', '\t', length(COLOR_SAMPLE), 'groups specified\n' )
