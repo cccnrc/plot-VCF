@@ -7,6 +7,7 @@
 #' @param VAR_Y (optional) the Y-axis coordinates for the variants
 #' @param VAR_FLAG (optional) the VCF variable to use as Y-axis for the variants
 #' @param SPACELINE (optional) show line between chromosomes
+#' @param EXON (optional) plot exons
 #' @param GENE_GR (optional) GRanges object of genes to focus the plot on
 #' @param THRESHOLD (optional) a threshold line to use as Y-axis
 #' @param XLIM (optional) limits for Y-axis
@@ -14,25 +15,50 @@
 #' @param SAMPLE_DB (optional) 2-column dataframe with sample-group to color plot accordingly
 #' @param CHR_NAMES (optional) vector with chromosme names to plot
 #' @return The VCF variant plot
-make_plot <- function(MODELED_VCF, SEQINFO, VAR_Y=FALSE, VAR_FLAG="POS", SPACELINE=FALSE, SHAPE=FALSE, GENE_GR=FALSE, SAMPLE_DB=FALSE, THRESHOLD=FALSE, XLIM=FALSE, CHR_NAMES=c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22","chrX","chrY")){
+make_plot <- function(MODELED_VCF, SEQINFO, VAR_Y=FALSE, VAR_FLAG="POS", SPACELINE=FALSE, SHAPE=FALSE, GENE_GR=FALSE, EXON=FALSE, SAMPLE_DB=FALSE, THRESHOLD=FALSE, XLIM=FALSE, CHR_NAMES=c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22","chrX","chrY")){
+  removeOVERLAP <- function( GRO ) {
+    GROR <- reduce(GRO)
+    GRO_DF <- data.frame(GRO)
+    GROR_DF <- data.frame(GROR)
+    GRO_S <- GRO_DF[ GRO_DF$start %in% GROR_DF$start & GRO_DF$end %in% GROR_DF$end, ]
+    GRO_S <- GRO_S[!duplicated(GRO_S$start, GRO_S$end),]
+    return(makeGRangesFromDataFrame( GRO_S, keep.extra.columns=T))
+  }
   ### check gene GRanges
   PLOT_LIMITS <- c( NA, NA )
+  PLOT_TITLE <- ""
   if ( !is.logical(GENE_GR) ) {
+    cat( '    -> adding GENE columns to VCF plot ... \n' )
+    GENE_GR <- removeOVERLAP(GENE_GR)
     ### remove variants outside regions from MODELED_VCF
     GENE_CHROM_POS_DF <- data.frame( 'CHROM' = seqnames( GENE_GR ), 'START' = as.numeric(data.frame( ranges(GENE_GR) )$start), 'STOP' = as.numeric(data.frame( ranges(GENE_GR) )$end), 'GENE' = GENE_GR$symbol )
     GENE_CHROM_POS_DF$CHROM <- droplevels(GENE_CHROM_POS_DF$CHROM)
     MODELED_VCF$CHROM <- droplevels(MODELED_VCF$CHROM)
-    MODELED_VCF_SUB <- MODELED_VCF[ as.character(MODELED_VCF$CHROM) == as.character(GENE_CHROM_POS_DF$CHROM[1]) & MODELED_VCF$POS >= GENE_CHROM_POS_DF$START[1] & MODELED_VCF$POS <= GENE_CHROM_POS_DF$STOP[1], ]
-    MODELED_VCF_SUB$GENE <- rep( GENE_CHROM_POS_DF$GENE[1], nrow(MODELED_VCF_SUB) )
-    for ( i in 2:nrow(GENE_CHROM_POS_DF) )
+    MODELED_VCF_SUB <- MODELED_VCF[ as.character(MODELED_VCF$CHROM) == as.character(GENE_CHROM_POS_DF$CHROM[1]), ]
+    cat( '      -> checking sample variants on specified gene(s) ... \n' )
+    VECTOR_GENE <- vector()
+    MODELED_VCF_SUB_EMPTY <- MODELED_VCF_SUB[0,]
+    for ( i in 1:nrow(GENE_CHROM_POS_DF) )
     {
-      SUB <- MODELED_VCF[ as.character(MODELED_VCF$CHROM) == as.character(GENE_CHROM_POS_DF$CHROM[i]) & MODELED_VCF$POS >= GENE_CHROM_POS_DF$START[i] & MODELED_VCF$POS <= GENE_CHROM_POS_DF$STOP[i], ]
-      SUB$GENE <- rep( GENE_CHROM_POS_DF$GENE[i], nrow(SUB) )
-      MODELED_VCF_SUB <- rbind(MODELED_VCF_SUB, SUB)
+      GENE_CHROM_POS_DF_START <- GENE_CHROM_POS_DF$START[i]
+      GENE_CHROM_POS_DF_STOP <- GENE_CHROM_POS_DF$STOP[i]
+      GENE_CHROM_POS_DF_GENE <- GENE_CHROM_POS_DF$GENE[i]
+      for ( x in 1:nrow(MODELED_VCF_SUB) )
+      {
+        if ((MODELED_VCF_SUB$POS[x] >= GENE_CHROM_POS_DF_START) & (MODELED_VCF_SUB$POS[x] <= GENE_CHROM_POS_DF_STOP)) {
+          VECTOR_GENE <- c( VECTOR_GENE, GENE_CHROM_POS_DF_GENE )
+          MODELED_VCF_SUB_EMPTY <- rbind( MODELED_VCF_SUB_EMPTY, MODELED_VCF_SUB[x,])
+        }
+      }
+    }
+    MODELED_VCF_SUB_EMPTY$GENE <- VECTOR_GENE
+    MODELED_VCF_SUB <- MODELED_VCF_SUB_EMPTY
+    if ( nrow(MODELED_VCF_SUB) < 1 ) {
+      stop("      -> no variant found on the specified gene(s) ...")
     }
     MODELED_VCF <- MODELED_VCF_SUB
     ### keep only present genes
-    GENE_PRESENT <- unique(MODELED_VCF$GENE)
+    GENE_PRESENT <- unique(MODELED_VCF[!is.na(MODELED_VCF$GENE),'GENE'])
     GENE_GR <- GENE_GR[ GENE_GR$symbol %in% GENE_PRESENT ]
     ### keep only valid variants in those genes
     MODELED_VCF <- MODELED_VCF[ !is.na(MODELED_VCF[,VAR_FLAG]), ]
@@ -43,13 +69,45 @@ make_plot <- function(MODELED_VCF, SEQINFO, VAR_Y=FALSE, VAR_FLAG="POS", SPACELI
     GENE_VALUES <- c( GENE_START, GENE_STOP )
     LIMIT <- (max(GENE_VALUES)-min(GENE_VALUES))/900
     PLOT_LIMITS <- c( min(GENE_VALUES)-(LIMIT*2), max(GENE_VALUES)+(LIMIT*2) )
-    GENE_COLOR <- rep( c("red","blue"), length(GENE_START) )
     ### create vectorwith start-end in succession
     GENE_LIMIT <- vector()
     for ( i in 1:length(GENE_START) )
     {
       GENE_LIMIT <- c(GENE_LIMIT, GENE_START[i])
       GENE_LIMIT <- c(GENE_LIMIT, GENE_STOP[i])
+    }
+    ### if asked for EXON analysis
+    if ( EXON == TRUE ) {
+      cat( '      -> adding EXON characteristics to VCF plot ... \n' )
+      ### extract exons from saved DB
+      GENE_EXONS_GR <- EXONS38[GENE_PRESENT]
+      PLOT_TITLE <- paste( GENE_PRESENT[1], 'exons' )
+      #GENE_EXONS_GR <- reduce(GENE_EXONS_GR)
+      ### extract gene chromosome
+      GENE_CHROM <- as.character(unique( MODELED_VCF[ !is.na(MODELED_VCF$CHROM), 'CHROM' ] )[1])
+      ### keep only exons in main chromosome
+      GENE_EXONS_GR <- GENE_EXONS_GR[ seqnames(GENE_EXONS_GR) == GENE_CHROM ]
+      GENE_EXONS_GR <- removeOVERLAP( GENE_EXONS_GR )
+      ### extract exons positions
+      GENE_EXONS_START <- data.frame(ranges(GENE_EXONS_GR))$start
+      GENE_EXONS_STOP <- data.frame(ranges(GENE_EXONS_GR))$end
+      GENE_EXONS_VALUES <- c( GENE_EXONS_START, GENE_EXONS_STOP )
+      EXONS_LIMIT <- (max(GENE_EXONS_VALUES)-min(GENE_EXONS_VALUES))/900
+      EXONS_PLOT_LIMITS <- c( min(GENE_EXONS_VALUES)-(LIMIT*2), max(GENE_EXONS_VALUES)+(LIMIT*2) )
+      ### create vectorwith start-end in succession
+      GENE_EXONS_LIMIT <- vector()
+      for ( i in 1:length(GENE_EXONS_START) )
+      {
+        GENE_EXONS_LIMIT <- c(GENE_EXONS_LIMIT, GENE_EXONS_START[i])
+        GENE_EXONS_LIMIT <- c(GENE_EXONS_LIMIT, GENE_EXONS_STOP[i])
+      }
+      ### replace GENE PLOT values with EXON ones
+      LIMIT <- EXONS_LIMIT
+      PLOT_LIMITS <- EXONS_PLOT_LIMITS
+      GENE_LIMIT <- GENE_EXONS_LIMIT
+      GENE_START <- GENE_EXONS_START
+      GENE_STOP <- GENE_EXONS_STOP
+      GENE_GR <- GENE_EXONS_GR
     }
   }
   ### set Y-axis limits as specified by user
@@ -136,15 +194,19 @@ make_plot <- function(MODELED_VCF, SEQINFO, VAR_Y=FALSE, VAR_FLAG="POS", SPACELI
     LEGEND_SHAPE <- "none"
   }
   if ( !is.logical(GENE_GR) ) {
+    ### remove group differences if exists
     if ( ! 'group' %in% colnames( MODELED_VCF ) ) {
       MODELED_VCF$group <- rep(1,nrow(MODELED_VCF))
     }
     ### adapt gene names
-    GENE_NAMES <- as.character(names( GENE_GR ))
+    if ( EXON == FALSE ) {
+      GENE_NAMES <- as.character(data.frame(GENE_GR)$symbol)
+    } else {
+      GENE_NAMES <- as.character(data.frame(GENE_GR)$exon_id)
+    }
     GENE_TEXT_X <- GENE_START+(( GENE_STOP - GENE_START ) / 2 )
-    # GENE_TEXT_Y <- runif( length(GENE_START), min=max(VAR_Y)+((Y_MAX-max(VAR_Y))/10), max=Y_MAX )
-    GENE_TEXT_Y <- vector()
     GENE_TEXT_Y_MIN <- max(VAR_Y)+((Y_MAX-max(VAR_Y))/2)
+    GENE_TEXT_Y <- vector()
     GENE_TEXT_Y <- rep( c( GENE_TEXT_Y_MIN, Y_MAX ), length(GENE_START)/2 )
     if ( length(GENE_TEXT_Y) < length(GENE_START) ) {
       GENE_TEXT_Y <- c( GENE_TEXT_Y, GENE_TEXT_Y_MIN )
@@ -158,6 +220,7 @@ make_plot <- function(MODELED_VCF, SEQINFO, VAR_Y=FALSE, VAR_FLAG="POS", SPACELI
                           ggplot2::geom_text( ggplot2::aes( x=GENE_TEXT_X, y=GENE_TEXT_Y, label=GENE_NAMES ), color = GENE_COLORS , angle=45, size=3 ) +
                           ggplot2::theme_bw() +
                           ggplot2::ylab( VAR_FLAG ) +
+                          ggplot2::ggtitle( PLOT_TITLE ) +
                           ggplot2::scale_shape_manual( values = SHAPE_SCALE, name = '') +
                           ggplot2::scale_y_continuous( limits = XLIMITS ) +
                           ggplot2::scale_x_continuous( "POS", limits = PLOT_LIMITS, labels = scales::label_comma() ) +
@@ -167,6 +230,7 @@ make_plot <- function(MODELED_VCF, SEQINFO, VAR_Y=FALSE, VAR_FLAG="POS", SPACELI
                                           panel.background=ggplot2::element_blank(),
                                           panel.border=ggplot2::element_blank(),
                                           axis.line=ggplot2::element_blank(),
+                                          plot.title = ggplot2::element_text(color="darkgrey", face="bold.italic", hjust = 0.5),
                                           axis.text.y = Y_AXIS_TEXT,
                                           axis.title.x=ggplot2::element_blank(),
                                           #axis.text.x = ggplot2::element_text(angle = 45, vjust = 1, hjust=1),

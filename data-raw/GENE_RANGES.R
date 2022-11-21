@@ -1,4 +1,5 @@
 BiocManager::install()
+library(biomaRt)
 BiocManager::install('AnnotationHub')
 library(AnnotationHub)
 ## Load the annotation resource.
@@ -23,7 +24,29 @@ seqlevels(GENES38) <- seqlevelsInUse(GENES38)
 usethis::use_data( GENES38, overwrite = TRUE )
 
 
-
+###### EXONS
+exons38 <- exonsBy( ens107, by='gene', columns='symbol' )
+### keep only main chromosomes
+exons38 <- exons38[ seqnames(exons38) %in% CHR_NAMES ]
+### get gene symbols
+mart <- useDataset("hsapiens_gene_ensembl", useMart("ensembl"))
+genes <- names(exons38)
+G_list <- getBM(filters= "ensembl_gene_id", attributes= c("ensembl_gene_id","hgnc_symbol"),values=genes,mart= mart)
+EXONS_FOUND <- vector()
+EXONS_GENES <- vector()
+for ( i in 1:length(exons38) )
+{
+  ENSID <- names(exons38)[i]
+  if ( ENSID %in% G_list$ensembl_gene_id ) {
+    SYMID <- G_list[ G_list$ensembl_gene_id == ENSID, 'hgnc_symbol' ][1]
+    EXONS_FOUND <- c( EXONS_FOUND, i )
+    EXONS_GENES <- c( EXONS_GENES, SYMID )
+  }
+}
+exons38p <- exons38[ EXONS_FOUND ]
+names(exons38p) <- EXONS_GENES
+EXONS38 <- exons38p
+usethis::use_data( EXONS38, overwrite = TRUE )
 
 
 

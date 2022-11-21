@@ -11,6 +11,7 @@ createVCFplot(
   VAR_FLAG = "POS",
   SHAPE = FALSE,
   GENE = FALSE,
+  EXON = FALSE,
   SAMPLE = "ALL",
   COLOR_SAMPLE = FALSE,
   XLIM = FALSE,
@@ -34,6 +35,8 @@ createVCFplot(
 \item{SHAPE}{(optional) different shape for each sample}
 
 \item{GENE}{(optional) genes to focus the plot on}
+
+\item{EXON}{(optional) plot exons}
 
 \item{SAMPLE}{(optional) samples to plot (default is all samples in VCF file)}
 

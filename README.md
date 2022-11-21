@@ -110,6 +110,19 @@ createVCFplot( VCF, VAR_FLAG="QUAL", COLOR_SAMPLE=COLOR_SAMPLE )
 ```
 ![plotVCF() sample focused plot - color group](plots/plotVCF.sample-focused-group.png)
 We love it! Hope you will too :wink:
+## gene(s) plot
+What if I want to investigate some specific gene in my VCF file? Let's say I want to take a look at HLA genes. I can plot these just variants relying in those genes just adding `GENE` option:
+```
+createVCFplot( VCF, VAR_FLAG="QUAL", GENE=c('HLA-DRB5', 'HLA-DRB1','HLA-DQA1','HLA-DQB1','HLA-DQB2', 'HLA-DQB2'), COLOR_SAMPLE=COLOR_SAMPLE )
+```
+![plotVCF() gene plot](plots/plotVCF.gene.png)
+## exon(s) plot
+Sometimes you want to deepen even more your analysis inside some specific gene. As in the example above, I see that many of my variants falls into HLA-DRQB1 gene. I can investigate which exon each of them pertains to with `EXON` option:
+```
+createVCFplot( VCF, VAR_FLAG="QUAL", COLOR_SAMPLE=COLOR_SAMPLE, GENE='HLA-DQB1', EXON=TRUE )
+```
+![plotVCF() exon plot](plots/plotVCF.exon.png)
+
 ## advanced plot
 There are many more combinations you can create with this package, explore all possible values with:
 ```

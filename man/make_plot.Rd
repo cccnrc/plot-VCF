@@ -12,6 +12,7 @@ make_plot(
   SPACELINE = FALSE,
   SHAPE = FALSE,
   GENE_GR = FALSE,
+  EXON = FALSE,
   SAMPLE_DB = FALSE,
   THRESHOLD = FALSE,
   XLIM = FALSE,
@@ -34,6 +35,8 @@ make_plot(
 \item{SHAPE}{(optional) different shape for each sample}
 
 \item{GENE_GR}{(optional) GRanges object of genes to focus the plot on}
+
+\item{EXON}{(optional) plot exons}
 
 \item{SAMPLE_DB}{(optional) 2-column dataframe with sample-group to color plot accordingly}
 
