@@ -117,7 +117,7 @@ createVCFplot( VCF, VAR_FLAG="QUAL", GENE=c('HLA-DRB5', 'HLA-DRB1','HLA-DQA1','H
 ```
 ![plotVCF() gene plot](plots/plotVCF.gene.png)
 ## exon(s) plot
-Sometimes you want to deepen even more your analysis inside some specific gene. As in the example above, I see that many of my variants falls into HLA-DRQB1 gene. I can investigate which exon each of them pertains to with `EXON` option:
+Sometimes you want to deepen even more your analysis inside some specific gene. As in the example above, I see that many of my variants falls into HLA-DQB1 gene. I can investigate which exon each of them pertains to with `EXON` option:
 ```
 createVCFplot( VCF, VAR_FLAG="QUAL", COLOR_SAMPLE=COLOR_SAMPLE, GENE='HLA-DQB1', EXON=TRUE )
 ```
