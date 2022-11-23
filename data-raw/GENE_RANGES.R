@@ -2,6 +2,7 @@ BiocManager::install()
 library(biomaRt)
 BiocManager::install('AnnotationHub')
 library(AnnotationHub)
+library(Homo.sapiens)
 ## Load the annotation resource.
 ah <- AnnotationHub()
 
@@ -54,18 +55,20 @@ usethis::use_data( EXONS38, overwrite = TRUE )
 
 
 ###### GRCh37
-ahDb37 <- query(ah, pattern = c("Homo Sapiens", "GRCh37"))
-ens37 <- ahDb37[["AH75190"]]$codingGenome
+# TxDb.Hsapiens.UCSC.hg19.knownGene
+# BSgenome.Hsapiens.UCSC.hg19
+ens37 <- genes(Homo.sapiens, columns='SYMBOL')
 seqlevelsStyle(ens37) <- "NCBI"
-#genes37 <- genes( ens37, columns="symbol" )
 ### keep only main chromosomes
 CHR_NAMES <- c("1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y","M")
-#genes38 <- genes38[ seqnames(genes38) %in% CHR_NAMES ]
+genes37 <- ens37[ seqnames(ens37) %in% CHR_NAMES ]
 ### remove missing
-#GENES38 <- genes38[ genes38$symbol != "" ]
+elementMetadata(genes37)[['SYMBOL']] <- sapply(genes37$SYMBOL,"[",1)
+GENES37 <- genes37[ !is.na(elementMetadata(genes37)[['SYMBOL']]) ]
+GENES37 <- GENES37[ elementMetadata(GENES37)[['SYMBOL']] != "" ]
 ### extract genes
-#GENES <- c( "HLA-A", "HLA-B" )
-#genes_focus <- genes38[ genes38$symbol %in% GENES ]
-#names( genes_focus ) <- genes_focus$symbol
+#GENES <- c( "COL4A5" )
+#genes_focus <- GENES37[ elementMetadata(GENES37)[['SYMBOL']] %in% GENES ]
+#names( genes_focus ) <- genes_focus$SYMBOL
 ### save object
-# usethis::use_data( GENES38, overwrite = TRUE )
+usethis::use_data( GENES38, overwrite = TRUE )
