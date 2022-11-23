@@ -35,8 +35,8 @@ You can use both `.vcf` and [bgzipped](http://www.htslib.org/doc/bgzip.html) `.v
 Let's have a look on how many different things you can achieve with this package!
 
 First thing first: there are two main analysis (and plots) that you can run through `plotVCF()`. These are:
-1. ***variant Manhattan-style plots***: visualize all/specific variants in your VCF file. You can plot subgroups based on position, sample, gene and/or exon [(documentation)](#Manhattan-style-plots)
-2. ***gene summary plots***: visualize plot of variants distribution across (selectable) genes in your VCF file [(documentation)](#gene-summary-plots)
+1. ***variant Manhattan-style plots***: visualize all/specific variants in your VCF file. You can plot subgroups based on position, sample, gene and/or exon [(createVCFplot())](#Manhattan-style-plots)
+2. ***gene summary plots***: visualize plot of variants distribution across (selectable) genes in your VCF file [(geneAnalysis())](#gene-summary-plots)
 
 
 ## Manhattan-style plots
