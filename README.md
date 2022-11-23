@@ -149,7 +149,7 @@ geneAnalysis( VCF, CENTILE = 0.95 )$PLOT$MERGED
 ```
 ![plotVCF() gene-wise centile plot](plots/plotVCF.gene-wise.centile.png)
 
-You might be very interested in visualize difference in mutation rate for each gene and samples grouped (e.g. cases vs. controls). Just add `COLOR_SAMPLE` option (same `list()` object explained [above](#sample-focused-plot---color-groups]):
+You might be very interested in visualize difference in mutation rate for each gene and samples grouped (e.g. cases vs. controls). Just add `COLOR_SAMPLE` option (same `list()` object explained [above](#sample-focused-plot---color-groups):
 ```
 geneAnalysis( VCF_FILE, COLOR_SAMPLE = COLOR_SAMPLE, CENTILE = 0.95 )$PLOT$MERGED
 ```
