@@ -99,7 +99,7 @@ geneAnalysis <- function( VCF_FILE, FASTA_FILE = FALSE, ASSEMBLY="hg38", CENTILE
     }
   }
   ### read the VCF file
-  VCF_DATA <- read_vcf( VCF_FILE, SEQ, ASSEMBLY, SAMPLE, CHR_NAMES )
+  VCF_DATA <- read_vcf( VCF_FILE, SEQ, ASSEMBLY=ASSEMBLY, SAMPLE=SAMPLE, CHR_NAMES=CHR_NAMES )
   ### modify loaded data
   if ( (exists("SAMPLE_DB")) && ( is.data.frame(get('SAMPLE_DB')) ) ) {
     SAMPLE_DB <- SAMPLE_DB

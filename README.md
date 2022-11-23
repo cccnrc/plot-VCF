@@ -134,7 +134,7 @@ createVCFplot( VCF, VAR_FLAG="QUAL", COLOR_SAMPLE=COLOR_SAMPLE, GENE='HLA-DQB1',
 ## gene summary plots
 This is the function to use if you want to perform an analysis about variant distribution across different genes in your VCF file.
 
-This function returns both plots `geneAnalysis( VCF )$PLOT` and summary tables `geneAnalysis( VCF )$TAB`: take a look at them: you have both single-sample, grouped and merged tables and plots!
+This function returns both plots `geneAnalysis( VCF )$PLOT` and summary tables `geneAnalysis( VCF )$TAB`: take a look at them: you have both single-sample (`$SAMPLE`), grouped (`$GROUP`) and overall (`$SUM`) tables and plots! `geneAnalysis( VCF )` plots a merged plot with all the others plots in it: `geneAnalysis( VCF )$PLOT$MERGED`
 
 Let's say you want to know on which genes most of your variants are. You can easily plot this through `geneAnalysis()` function. It will plot for you each gene number of variants, both summarized over all samples (above) and for each single sample (below):
 ```
