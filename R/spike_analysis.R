@@ -182,7 +182,7 @@ spike_analysis <- function( VCF_DATA, CENTILE = 0.9, SAMPLE_DB=FALSE, SHAPE=FALS
                                   panel.grid.minor.x = ggplot2::element_blank() ,
                                   panel.grid.minor.y = ggplot2::element_blank(),
                                   legend.position="top",
-                                  legend.text = ggplot2::element_text(size = 5),
+                                  legend.text = ggplot2::element_text(size = 4),
                                   legend.title = ggplot2::element_blank()
                                 )
     SUM_PLOT <- ggplot2::ggplot(SUMMARY_DB_TR$SUM) +
