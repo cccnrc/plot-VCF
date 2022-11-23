@@ -4,29 +4,16 @@
 \alias{load_vcf}
 \title{Load a VCF file}
 \usage{
-load_vcf(
-  VCF_FILE,
-  SEQINFO,
-  ASSEMBLY = "hg38",
-  SAMPLE = "ALL",
-  VAR_FLAG = "POS",
-  CHR_NAMES = c("chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9",
-    "chr10", "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18",
-    "chr19", "chr20", "chr21", "chr22", "chrX", "chrY")
-)
+load_vcf(VCF_DATA, SEQINFO, SAMPLE = "ALL", VAR_FLAG = "POS")
 }
 \arguments{
-\item{VCF_FILE}{Path to the input VCF file}
+\item{VCF_DATA}{loaded VCF file (read_vcf() output)}
 
 \item{SEQINFO}{the object with chromosome characteristics: load_chr()}
-
-\item{ASSEMBLY}{(optional) assembly of the VCF file (default hg38)}
 
 \item{SAMPLE}{(optional) samples to plot (default is all samples in VCF file)}
 
 \item{VAR_FLAG}{(optional) the VCF variable to use as Y-axis for the variants, default is just position}
-
-\item{CHR_NAMES}{(optional) vector with chromosme names to plot}
 }
 \value{
 A matrix of the infile
