@@ -36,7 +36,8 @@ Let's have a look on how many different things you can achieve with this package
 
 First thing first: there are two main analysis (and plots) that you can run through `plotVCF()`. These are:
 1. ***variant Manhattan-style plots***: visualize all/specific variants in your VCF file. You can plot subgroups based on position, sample, gene and/or exon [(createVCFplot())](#Manhattan-style-plots)
-2. ***gene summary plots***: visualize plot of variants distribution across (selectable) genes in your VCF file [(geneAnalysis())](#gene-summary-plots)
+2. ***chromosome summary plots***: visualize plot of variants distribution across (selectable) chromosomes in your VCF file [(chrAnalysis())](#chromosome-summary-plots)
+3. ***gene summary plots***: visualize plot of variants distribution across (selectable) genes in your VCF file [(geneAnalysis())](#gene-summary-plots)
 
 
 ## Manhattan-style plots
@@ -130,6 +131,34 @@ Sometimes you want to deepen even more your analysis inside some specific gene. 
 createVCFplot( VCF, VAR_FLAG="QUAL", COLOR_SAMPLE=COLOR_SAMPLE, GENE='HLA-DQB1', EXON=TRUE )
 ```
 ![plotVCF() exon plot](plots/plotVCF.exon.png)
+
+## chromosome summary plots
+Let's perform an analysis about variant distribution across different chromosomes in your VCF file.
+
+`chrAnalysis()` function returns both plots `chrAnalysis( VCF )$PLOT` and summary tables `chrAnalysis( VCF )$TAB`: take a look at them: you have both single-sample (`$SAMPLE`), grouped (`$GROUP`) and overall (`$SUM`) tables and plots! `chrAnalysis()` plots a merged plot with all the others plots in it: `geneAnalysis( VCF )$PLOT$MERGED`
+
+Let's have a look at the chromosome summary plots
+```
+chrAnalysis( VCF )$PLOT$MERGED
+```
+![plotVCF() chromosome-wise plot](plots/plotVCF.chr-wise.png)
+You can choose the Y-axis values through `METHOD` option:
+- `RAW`: raw number of variants
+- `LEN`: number of variants / chromosome length (ratio: each chromosome length is divided by the median chromosome length)
+- `COD`: number of variants / chromosome coding regions overall length (ratio)
+- `LENCOD`: number of variants / chromosome length (ratio) * chromosome coding regions overall length (ratio)
+
+These different options allow you to normalize your variants and identify which chromosomes underwent a higher mutation rate:
+```
+chrAnalysis( VCF, METHOD = "LENCOD" )$PLOT$MERGED
+```
+![plotVCF() chromosome-wise LENCOD plot](plots/plotVCF.chr-wise.lencod.png)
+
+You might be very interested in visualize difference for grouped samples (e.g. cases vs. controls). Just add `COLOR_SAMPLE` option (same `list()` object explained [above](#sample-focused-plot---color-groups):
+```
+chrAnalysis( VCF_FILE, COLOR_SAMPLE = COLOR_SAMPLE, METHOD = "LENCOD" )$PLOT$MERGED
+```
+![plotVCF() chromosome-wise color plot](plots/plotVCF.chr-wise.color.png)
 
 ## gene summary plots
 This is the function to use if you want to perform an analysis about variant distribution across different genes in your VCF file.

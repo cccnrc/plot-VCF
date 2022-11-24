@@ -1,9 +1,9 @@
-#' Load a VCF file
+#' Gene analysis of passed VCF file
 #'
-#' This function loads a VCF file as a matrix.
+#' This function takes in the loaded VCF (read_vcf()) and operates calculations for the gene analysis
 #'
 #' @param VCF_DATA loaded VCF file (read_vcf() output)
-#' @param CENTILE percentile of genes to use in the plot (default is 0.9: only genes with a number of variants >90%-centile will be plotted)
+#' @param CENTILE (optional) percentile of genes to use in the plot (default is 0.9: only genes with a number of variants >90%-centile will be plotted)
 #' @param SAMPLE_DB (optional) 2-column dataframe with sample-group to color plot accordingly
 #' @param SHAPE (optional) different shape for each sample - to implement
 #' @param THRESHOLD (optional) a threshold line to use as Y-axis - to implement
