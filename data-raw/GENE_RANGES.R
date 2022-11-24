@@ -1,8 +1,8 @@
 BiocManager::install()
-library(biomaRt)
 BiocManager::install('AnnotationHub')
+library(biomaRt)
 library(AnnotationHub)
-library(Homo.sapiens)
+#library(Homo.sapiens)
 ## Load the annotation resource.
 ah <- AnnotationHub()
 
@@ -55,20 +55,39 @@ usethis::use_data( EXONS38, overwrite = TRUE )
 
 
 ###### GRCh37
-# TxDb.Hsapiens.UCSC.hg19.knownGene
-# BSgenome.Hsapiens.UCSC.hg19
-ens37 <- genes(Homo.sapiens, columns='SYMBOL')
-seqlevelsStyle(ens37) <- "NCBI"
+library(EnsDb.Hsapiens.v75)
+ens37 <- genes( EnsDb.Hsapiens.v75, columns="symbol" )
+# seqlevelsStyle(ens37) <- "NCBI"
 ### keep only main chromosomes
 CHR_NAMES <- c("1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y","M")
 genes37 <- ens37[ seqnames(ens37) %in% CHR_NAMES ]
 ### remove missing
+
 elementMetadata(genes37)[['SYMBOL']] <- sapply(genes37$SYMBOL,"[",1)
-GENES37 <- genes37[ !is.na(elementMetadata(genes37)[['SYMBOL']]) ]
-GENES37 <- GENES37[ elementMetadata(GENES37)[['SYMBOL']] != "" ]
-### extract genes
-#GENES <- c( "COL4A5" )
-#genes_focus <- GENES37[ elementMetadata(GENES37)[['SYMBOL']] %in% GENES ]
-#names( genes_focus ) <- genes_focus$SYMBOL
+GENES37 <- genes37[ !is.na(genes37$symbol) ]
+GENES37 <- GENES37[ GENES37$symbol != "" ]
 ### save object
-usethis::use_data( GENES38, overwrite = TRUE )
+usethis::use_data( GENES37, overwrite = TRUE )
+
+###### EXONS
+
+query(ah, pattern = c("Homo Sapiens", "ensembl", "GRCh37"))
+ens37 <- ah[['AH10684']]
+exons37 <- ens37[ ens37$type == 'exon' ]
+exons37 <- exons37[ seqnames(exons37) %in% CHR_NAMES ]
+
+### create a GRangesList object from single gene exons GRanges
+genes37 <- unique( exons37$gene_name )
+GR_VECTOR <- vector()
+for ( GENE in genes37 )
+{
+  GENE_GR <- exons37[ exons37$gene_name == GENE ]
+  GR_VECTOR <- c( GR_VECTOR, GENE_GR )
+}
+EXONS37_GRL <- GRangesList( GR_VECTOR )
+names(EXONS37_GRL) <- genes37
+### add a symbol column
+mcols(EXONS37_GRL, level="within")[,'symbol'] <- mcols(EXONS37_GRL, level="within")[,'gene_name']
+EXONS37 <- EXONS37_GRL
+### save data
+usethis::use_data( EXONS37, overwrite = TRUE )

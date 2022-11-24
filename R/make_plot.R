@@ -80,7 +80,14 @@ make_plot <- function(MODELED_VCF, SEQINFO, VAR_Y=FALSE, VAR_FLAG="POS", SPACELI
     if ( EXON == TRUE ) {
       cat( '      -> adding EXON characteristics to VCF plot ... \n' )
       ### extract exons from saved DB
-      GENE_EXONS_GR <- EXONS38[GENE_PRESENT]
+      VCF_ASSEMBLY <- as.character( genome(SEQINFO)[1] )
+      if (( VCF_ASSEMBLY == 'hg38' )||(VCF_ASSEMBLY == 'GRCh38')) {
+        GENE_EXONS_GR <- EXONS38[GENE_PRESENT]
+      } else if (( VCF_ASSEMBLY == 'hg19' )||(VCF_ASSEMBLY == 'GRCh37')) {
+        GENE_EXONS_GR <- EXONS37[GENE_PRESENT]
+      } else {
+        stop( '  -> implementation for', VCF_ASSEMBLY, 'still under developement...' )
+      }
       PLOT_TITLE <- paste( GENE_PRESENT[1], 'exons' )
       #GENE_EXONS_GR <- reduce(GENE_EXONS_GR)
       ### extract gene chromosome

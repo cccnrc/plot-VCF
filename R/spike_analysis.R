@@ -54,6 +54,11 @@ spike_analysis <- function( VCF_DATA, CENTILE = 0.9, SAMPLE_DB=FALSE, SHAPE=FALS
   ### function to transform summary DB
   transform_summary_db <- function( SUMMARY_DB, CENTILE=0.9, SAMPLE_DB=FALSE )
   {
+    ### keep only values above 90% centile
+    N_START <- nrow(SUMMARY_DB)
+    SUMMARY_DB <- SUMMARY_DB[ SUMMARY_DB$SUM > as.numeric(quantile( SUMMARY_DB$SUM, CENTILE )), ]
+    N_FILT <- nrow(SUMMARY_DB)
+    cat( "  -> transform_summary_db() reduced DB from n.", N_START, "to n.", N_FILT, " ( centile:", CENTILE, ")\n" )
     ### extract samples from passed DB
     SAMPLE_VEC <- colnames(SUMMARY_DB[,c(-1,-2,-ncol(SUMMARY_DB)) ])
     ### derive each sample GROUP based on COLOR_SAMPLE
@@ -65,12 +70,6 @@ spike_analysis <- function( VCF_DATA, CENTILE = 0.9, SAMPLE_DB=FALSE, SHAPE=FALS
     } else {
       SAMPLE_GROUP_DB <- data.frame( 'SAM' = SAMPLE_VEC, 'GROUP' = rep(1,length(SAMPLE_VEC)) )
     }
-    ### derive DB values
-    N_START <- nrow(SUMMARY_DB)
-    ### keep only values above 90% centile
-    SUMMARY_DB <- SUMMARY_DB[ SUMMARY_DB$SUM > as.numeric(quantile( SUMMARY_DB$SUM, CENTILE )), ]
-    N_FILT <- nrow(SUMMARY_DB)
-    cat( "  -> transform_summary_db() reduced DB from n.", N_START, "to n.", N_FILT, " ( centile:", CENTILE, ")\n" )
     ### add gene lenght
     GENE_VECTOR <- vector()
     for ( i in 1:nrow(SUMMARY_DB) )

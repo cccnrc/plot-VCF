@@ -28,6 +28,8 @@ vcf_genes <- function( VCF_DATA, COLUMN="symbol", STRING=FALSE, SINGLE=FALSE ){
   VCF_ASSEMBLY <- as.character( genome(VCF_DATA)[1] )
   if (( VCF_ASSEMBLY == 'hg38' )||(VCF_ASSEMBLY == 'GRCh38')) {
     VCF_GENES <- splitColumnByOverlap(GENES38, VCF_DATA, COLUMN="symbol", STRING=STRING, SINGLE=SINGLE)
+  } else  if (( VCF_ASSEMBLY == 'hg19' )||(VCF_ASSEMBLY == 'GRCh37')) {
+    VCF_GENES <- splitColumnByOverlap(GENES37, VCF_DATA, COLUMN="symbol", STRING=STRING, SINGLE=SINGLE)
   } else {
     stop( '  -> implementation for', VCF_ASSEMBLY, 'still under developement...' )
   }
