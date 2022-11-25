@@ -7,6 +7,7 @@
 chrAnalysis(
   VCF_FILE,
   METHOD = "RAW",
+  TYPE = FALSE,
   FASTA_FILE = FALSE,
   ASSEMBLY = "hg38",
   CENTILE = 0.9,
@@ -22,6 +23,8 @@ chrAnalysis(
 \item{VCF_FILE}{Path to the input VCF file}
 
 \item{METHOD}{how to count (and plot) variants for each chromosome ("RAW"=raw number, "LEN"=n/chr-length(ratio), "COD"=n/chr-coding-length(ratio), "LENCOD"=n/chr-length(ratio)*chr-coding-length(ratio))}
+
+\item{TYPE}{(optional) divide SNP and INDELs}
 
 \item{FASTA_FILE}{(optional) Path to the input FASTA file}
 

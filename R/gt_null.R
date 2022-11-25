@@ -6,6 +6,12 @@
 #' @param GT_NULL (optional) vector passing GT values to consider null (default: c( '0/0', './.', '0|0', '.|.', '0', '.' ))
 #' @return non null GT vector
 gt_null <- function( GT_VECTOR, GT_NULL=c( '0/0', './.', '0|0', '.|.', '0', '.' ) ){
-  GT_N <- setdiff( GT_VECTOR, GT_NULL )
+  GT_N <- vector()
+  for ( VALUE in GT_VECTOR )
+  {
+    if ( ! VALUE %in% GT_NULL ) {
+      GT_N <- c( GT_N, VALUE )
+    }
+  }
   return( GT_N )
 }

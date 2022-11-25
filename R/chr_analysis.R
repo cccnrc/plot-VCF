@@ -4,42 +4,91 @@
 #'
 #' @param VCF_DATA loaded VCF file (read_vcf() output)
 #' @param METHOD how to count (and plot) variants for each chromosome ("RAW"=raw number, "LEN"=n/chr-length(ratio), "COD"=n/chr-coding-length(ratio), "LENCOD"=n/chr-length(ratio)*chr-coding-length(ratio))
+#' @param TYPE (optional) divide SNP and INDELs
 #' @param SAMPLE_DB (optional) 2-column dataframe with sample-group to color plot accordingly
 #' @param SHAPE (optional) different shape for each sample - to implement
 #' @param THRESHOLD (optional) a threshold line to use as Y-axis - to implement
 #' @param CHR_NAMES (optional) vector with chromosme names to plot
 #' @return gene-wise sumamries and plots
-chr_analysis <- function( VCF_DATA, METHOD="RAW", SAMPLE_DB=FALSE, SHAPE=FALSE, THRESHOLD=FALSE, CHR_NAMES=c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22","chrX")  ){
+chr_analysis <- function( VCF_DATA, METHOD="RAW", TYPE=FALSE, SAMPLE_DB=FALSE, SHAPE=FALSE, THRESHOLD=FALSE, CHR_NAMES=c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22","chrX")  ){
+
+  TYPE_LEVELS <- c( 'SNV', 'INDEL' )
+
+  ### function to combine column values
+  combine_cols <- function( COL1, COL2, SEPARATOR = "-" ) {
+    NEW_GROUP_VECTOR <- vector()
+    for ( i in 1:length(COL1) )
+    {
+      NEW_GROUP_VALUE <- paste( COL1[i], SEPARATOR, COL2[i], sep = '' )
+      NEW_GROUP_VECTOR <- c( NEW_GROUP_VECTOR, NEW_GROUP_VALUE )
+    }
+    NEW_GROUP_VECTOR <- factor( NEW_GROUP_VECTOR, levels = sort(unique(NEW_GROUP_VECTOR)) )
+    return( NEW_GROUP_VECTOR )
+  }
 
   ### function to extract chromosome values for each sample
-  get_sample_chr <- function( VCF_DATA, METHOD="RAW" )
+  get_sample_chr <- function( VCF_DATA, METHOD="RAW", TYPE=FALSE )
   {
     ### extract VCF data
     VCF_SAMPLES <- rownames(colData( VCF_DATA ))
     VCF_CHROM <- data.frame(rowRanges(VCF_DATA))$seqnames
     VCF_GT <- geno(VCF_DATA)$GT
+
+    ### extract variant type
+    if ( (is.logical(TYPE)) && ( TYPE != FALSE ) ) {
+      VCF_VAR_TYPE <- snp_indel( VCF_DATA )
+    }
     ### prepare chromosome DB
     CHR_DF <- data.frame( 'CHROM' = chr_order(VCF_CHROM) )
     CHR_DF$CHROM <- factor( CHR_DF$CHROM, levels = chr_order(CHR_DF$CHROM) )
+    ### if asked for type the DB will be longer
+    if ( (is.logical(TYPE)) && ( TYPE != FALSE ) ) {
+      CHR_DF <- rbind( CHR_DF, CHR_DF )
+      CHR_DF$CHROM <- factor( CHR_DF$CHROM, levels = chr_order(CHR_DF$CHROM) )
+    }
     ### loop over sample to get variants in each chromosome
     for ( SAMPLE in VCF_SAMPLES )
     {
       ### recreate a 2-cols DB with CHR and GT
       SAMPLE_VECTOR <- vector()
-      SAMPLE_DB <- data.frame( 'CHROM' = VCF_CHROM, 'GT' = VCF_GT[,SAMPLE] )
+      if ( (is.logical(TYPE)) && ( TYPE != FALSE ) ) {
+        SAMPLE_DB <- data.frame( 'CHROM' = VCF_CHROM, 'GT' = VCF_GT[,SAMPLE], 'TYPE' = VCF_VAR_TYPE )
+        SAMPLE_DB$TYPE <- factor( SAMPLE_DB$TYPE, levels = TYPE_LEVELS )
+      } else {
+        SAMPLE_DB <- data.frame( 'CHROM' = VCF_CHROM, 'GT' = VCF_GT[,SAMPLE] )
+      }
+      ### extract non-null variants in that chromosome for each sample
       for ( CHR in levels(CHR_DF$CHROM) )
       {
-        ### extract non-null variants in that chromosome for each sample
-        SAMPLE_CHR_GT <- SAMPLE_DB[ SAMPLE_DB$CHROM == CHR, 'GT' ]
-        SAMPLE_CHR_GT_NONULL <- gt_null( SAMPLE_CHR_GT )
-        SAMPLE_CHR_GT_NONULL_N <- length(SAMPLE_CHR_GT_NONULL)
-        SAMPLE_VECTOR <- c( SAMPLE_VECTOR, SAMPLE_CHR_GT_NONULL_N )
+        ### if asked for TYPE differentiation the resulting DB will be double length
+        if ( (is.logical(TYPE)) && ( TYPE != FALSE ) ) {
+          for ( VAR_TYPE in TYPE_LEVELS )
+          {
+            SAMPLE_CHR_GT <- SAMPLE_DB[ SAMPLE_DB$CHROM == CHR & SAMPLE_DB$TYPE == VAR_TYPE, 'GT' ]
+            SAMPLE_CHR_GT_NONULL <- gt_null( SAMPLE_CHR_GT )
+            SAMPLE_CHR_GT_NONULL_N <- length(SAMPLE_CHR_GT_NONULL)
+            SAMPLE_VECTOR <- c( SAMPLE_VECTOR, SAMPLE_CHR_GT_NONULL_N )
+          }
+        } else {
+          SAMPLE_CHR_GT <- SAMPLE_DB[ SAMPLE_DB$CHROM == CHR, 'GT' ]
+          SAMPLE_CHR_GT_NONULL <- gt_null( SAMPLE_CHR_GT )
+          SAMPLE_CHR_GT_NONULL_N <- length(SAMPLE_CHR_GT_NONULL)
+          SAMPLE_VECTOR <- c( SAMPLE_VECTOR, SAMPLE_CHR_GT_NONULL_N )
+          if ( SAMPLE == "GHARIgANY21uuITW2196372" ) {
+            if ( CHR == "chr1" ) {
+            }
+          }
+        }
       }
       ### add sample column to chromosome DB
       CHR_DF[,SAMPLE] <- SAMPLE_VECTOR
     }
     ### add SUM column (all samples sum)
     CHR_DF[,'SUM'] <- rowSums( CHR_DF[,-1] )
+    if ( (is.logical(TYPE)) && ( TYPE != FALSE ) ) {
+      CHR_DF[,'TYPE'] <- rep( levels( SAMPLE_DB$TYPE ), (nrow( CHR_DF ) / 2) )
+      CHR_DF[,'TYPE'] <- factor( CHR_DF[,'TYPE'], levels = TYPE_LEVELS )
+    }
 
     ### based on specified METHOD define column output
     cat( '    -> passed chromosomes plotting method:', METHOD, '\n' )
@@ -106,14 +155,24 @@ chr_analysis <- function( VCF_DATA, METHOD="RAW", SAMPLE_DB=FALSE, SHAPE=FALSE, 
 
 
   ### create DB as needed by ggplot2
-  transform_summary_chr_db <- function(SUMMARY_DB, SAMPLE_DB=FALSE) {
+  transform_summary_chr_db <- function(SUMMARY_DB, TYPE=FALSE, SAMPLE_DB=FALSE) {
     ### extract overall chromosome DB
     SUMMARY_DB_SUM <- SUMMARY_DB[,c('CHROM','SUM')]
     ### extract single-sample chromosome DB
     SAMPLE_VECTOR <- vector()
     CHROM_VECTOR <- vector()
     VALUE_VECTOR <- vector()
-    for ( i in 2:(ncol(SUMMARY_DB)-1) )
+
+    ### define how many columns to ignore
+    if ( (is.logical(TYPE)) && ( TYPE != FALSE ) ) {
+      SUMMARY_DB_SUM$TYPE <- SUMMARY_DB$TYPE
+      SUMMARY_DB_SUM$TYPE <- factor( SUMMARY_DB$TYPE, levels = TYPE_LEVELS )
+      LOOP_END <- ncol(SUMMARY_DB) - 2
+    } else {
+      LOOP_END <- ncol(SUMMARY_DB) - 1
+    }
+    ### loop over samples
+    for ( i in 2:LOOP_END )
     {
       SAMPLE <- as.character(colnames(SUMMARY_DB)[i])
       SAMPLE_VECTOR <- c( SAMPLE_VECTOR, rep( SAMPLE, nrow(SUMMARY_DB) ) )
@@ -126,6 +185,10 @@ chr_analysis <- function( VCF_DATA, METHOD="RAW", SAMPLE_DB=FALSE, SHAPE=FALSE, 
     }
     SUMMARY_DB_SINGLE <- data.frame( 'CHROM' = CHROM_VECTOR, 'SAMPLE' = SAMPLE_VECTOR, 'VALUE' = VALUE_VECTOR )
     SUMMARY_DB_SINGLE$CHROM <- factor(SUMMARY_DB_SINGLE$CHROM, levels = chr_order(SUMMARY_DB_SINGLE$CHROM))
+    if ( (is.logical(TYPE)) && ( TYPE != FALSE ) ) {
+      SUMMARY_DB_SINGLE$TYPE <- rep( TYPE_LEVELS, nrow(SUMMARY_DB_SINGLE)/2 )
+      SUMMARY_DB_SINGLE$TYPE <- factor( SUMMARY_DB_SINGLE$TYPE, levels = TYPE_LEVELS )
+    }
 
     ### create GROUP DB to plot out, if asked
     if ( !is.logical(SAMPLE_DB) ) {
@@ -157,6 +220,10 @@ chr_analysis <- function( VCF_DATA, METHOD="RAW", SAMPLE_DB=FALSE, SHAPE=FALSE, 
       SUMMARY_GROUP_DB[,'GROUP'] <- GROUP_VEC
       SUMMARY_GROUP_DB[,'VALUE'] <- GROUP_CHROM_VEC
       SUMMARY_GROUP_DB[,'GROUP'] <- factor( SUMMARY_GROUP_DB[,'GROUP'] )
+      if ( (is.logical(TYPE)) && ( TYPE != FALSE ) ) {
+        SUMMARY_GROUP_DB[,'TYPE'] <- rep( TYPE_LEVELS, nrow(SUMMARY_GROUP_DB)/2)
+        SUMMARY_GROUP_DB$TYPE <- factor( SUMMARY_GROUP_DB$TYPE, levels = TYPE_LEVELS )
+      }
       ### return 3 DB
       SUMMARY_RETURN <- list( 'SUM' = SUMMARY_DB_SUM, 'SINGLE' = SUMMARY_DB_SINGLE, 'GROUP' = SUMMARY_GROUP_DB )
       return(SUMMARY_RETURN)
@@ -170,7 +237,7 @@ chr_analysis <- function( VCF_DATA, METHOD="RAW", SAMPLE_DB=FALSE, SHAPE=FALSE, 
 
 
   ### function to plot chromosome summaries
-  make_summary_chr_plot <- function( SUMMARY_RETURN, METHOD="RAW", SAMPLE_DB=FALSE, THRESHOLD = FALSE, SHAPE = FALSE )
+  make_summary_chr_plot <- function( SUMMARY_RETURN, METHOD="RAW", TYPE=FALSE, SAMPLE_DB=FALSE, THRESHOLD = FALSE, SHAPE = FALSE )
   {
     ### create Y-label based on METHOD passed
     if ( METHOD == "RAW" ) {
@@ -184,8 +251,62 @@ chr_analysis <- function( VCF_DATA, METHOD="RAW", SAMPLE_DB=FALSE, SHAPE=FALSE, 
     }
     ### if COLOR_SAMPLE create the relative plot
     if ( !is.logical(SAMPLE_DB) ) {
-      SAMPLE_GROUP_PLOT <- ggplot2::ggplot(SUMMARY_RETURN$GROUP) +
-                                  ggplot2::geom_line(ggplot2::aes(x=CHROM, y=VALUE, color=GROUP, group=GROUP)) +
+      if ( (is.logical(TYPE)) && ( TYPE != FALSE ) ) {
+        SUMMARY_RETURN$GROUP$GROUP <- combine_cols(SUMMARY_RETURN$GROUP$GROUP, SUMMARY_RETURN$GROUP$TYPE)
+        ### adapt the DB
+        SAMPLE_GROUP_PLOT <- ggplot2::ggplot(SUMMARY_RETURN$GROUP) +
+                                    ggplot2::geom_line(ggplot2::aes(x=CHROM, y=VALUE, color=GROUP, group=GROUP)) +
+                                    # ggplot2::geom_point( ggplot2::aes( shape = TYPE ) ) +
+                                    ggplot2::guides(colour = ggplot2::guide_legend(nrow = 1)) +
+                                    ggplot2::xlab("") +
+                                    ggplot2::ylab(YLABEL) +
+                                    ggplot2::theme_bw() +
+                                    ggplot2::theme(
+                                      axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust=1),
+                                      panel.grid.major.x = ggplot2::element_blank() ,
+                                      panel.grid.minor.x = ggplot2::element_blank() ,
+                                      panel.grid.minor.y = ggplot2::element_blank(),
+                                      legend.position="top",
+                                      legend.title = ggplot2::element_blank()
+                                    )
+        } else {
+          SAMPLE_GROUP_PLOT <- ggplot2::ggplot(SUMMARY_RETURN$GROUP) +
+                                      ggplot2::geom_line(ggplot2::aes(x=CHROM, y=VALUE, color=GROUP, group=GROUP)) +
+                                      ggplot2::guides(colour = ggplot2::guide_legend(nrow = 1)) +
+                                      ggplot2::xlab("") +
+                                      ggplot2::ylab(YLABEL) +
+                                      ggplot2::theme_bw() +
+                                      ggplot2::theme(
+                                        axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust=1),
+                                        panel.grid.major.x = ggplot2::element_blank() ,
+                                        panel.grid.minor.x = ggplot2::element_blank() ,
+                                        panel.grid.minor.y = ggplot2::element_blank(),
+                                        legend.position="top",
+                                        legend.title = ggplot2::element_blank()
+                                      )
+        }
+    }
+    CHROM_COLORS <- sample(viridis::turbo(length(levels(SUMMARY_RETURN$SUM$CHROM))*3))[1:length(levels(SUMMARY_RETURN$SUM$CHROM))]
+    if ( (is.logical(TYPE)) && ( TYPE != FALSE ) ) {
+      SUMMARY_RETURN$SINGLE$SAMPLE <- combine_cols(SUMMARY_RETURN$SINGLE$SAMPLE, SUMMARY_RETURN$SINGLE$TYPE)
+      SAMPLE_PLOT <- ggplot2::ggplot(SUMMARY_RETURN$SINGLE) +
+                                  ggplot2::geom_line(ggplot2::aes(x=CHROM, y=VALUE, color=SAMPLE, group=SAMPLE)) +
+                                  ggplot2::guides(colour = ggplot2::guide_legend(nrow = 2)) +
+                                  ggplot2::xlab("") +
+                                  ggplot2::ylab(YLABEL) +
+                                  ggplot2::theme_bw() +
+                                  ggplot2::theme(
+                                    axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust=1),
+                                    panel.grid.major.x = ggplot2::element_blank() ,
+                                    panel.grid.minor.x = ggplot2::element_blank() ,
+                                    panel.grid.minor.y = ggplot2::element_blank(),
+                                    legend.position="top",
+                                    legend.text = ggplot2::element_text(size = 4),
+                                    legend.title = ggplot2::element_blank()
+                                  )
+      SUM_PLOT <- ggplot2::ggplot(SUMMARY_RETURN$SUM) +
+                                  ggplot2::geom_line(ggplot2::aes(x=CHROM, y=SUM, color=TYPE, group=TYPE)) +
+                                  ggplot2::scale_color_manual( values = c( "#2a9d8f", "#f4a261" ) ) +
                                   ggplot2::guides(colour = ggplot2::guide_legend(nrow = 1)) +
                                   ggplot2::xlab("") +
                                   ggplot2::ylab(YLABEL) +
@@ -198,38 +319,38 @@ chr_analysis <- function( VCF_DATA, METHOD="RAW", SAMPLE_DB=FALSE, SHAPE=FALSE, 
                                     legend.position="top",
                                     legend.title = ggplot2::element_blank()
                                   )
+    } else {
+      SAMPLE_PLOT <- ggplot2::ggplot(SUMMARY_RETURN$SINGLE) +
+                                  ggplot2::geom_line(ggplot2::aes(x=CHROM, y=VALUE, color=SAMPLE, group=SAMPLE)) +
+                                  ggplot2::guides(colour = ggplot2::guide_legend(nrow = 1)) +
+                                  ggplot2::xlab("") +
+                                  ggplot2::ylab(YLABEL) +
+                                  ggplot2::theme_bw() +
+                                  ggplot2::theme(
+                                    axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust=1),
+                                    panel.grid.major.x = ggplot2::element_blank() ,
+                                    panel.grid.minor.x = ggplot2::element_blank() ,
+                                    panel.grid.minor.y = ggplot2::element_blank(),
+                                    legend.position="top",
+                                    legend.text = ggplot2::element_text(size = 4),
+                                    legend.title = ggplot2::element_blank()
+                                  )
+      SUM_PLOT <- ggplot2::ggplot(SUMMARY_RETURN$SUM) +
+                                  ggplot2::geom_line(ggplot2::aes(x=CHROM, y=SUM, color=CHROM, group=1)) +
+                                  #ggplot2::scale_color_manual( values = CHROM_COLORS ) +
+                                  ggplot2::guides(colour = ggplot2::guide_legend(nrow = 1)) +
+                                  ggplot2::xlab("") +
+                                  ggplot2::ylab(YLABEL) +
+                                  ggplot2::theme_bw() +
+                                  ggplot2::theme(
+                                    axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust=1),
+                                    panel.grid.major.x = ggplot2::element_blank() ,
+                                    panel.grid.minor.x = ggplot2::element_blank() ,
+                                    panel.grid.minor.y = ggplot2::element_blank(),
+                                    legend.position="none",
+                                    legend.title = ggplot2::element_blank()
+                                  )
     }
-    SAMPLE_PLOT <- ggplot2::ggplot(SUMMARY_RETURN$SINGLE) +
-                                ggplot2::geom_line(ggplot2::aes(x=CHROM, y=VALUE, color=SAMPLE, group=SAMPLE)) +
-                                ggplot2::guides(colour = ggplot2::guide_legend(nrow = 1)) +
-                                ggplot2::xlab("") +
-                                ggplot2::ylab(YLABEL) +
-                                ggplot2::theme_bw() +
-                                ggplot2::theme(
-                                  axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust=1),
-                                  panel.grid.major.x = ggplot2::element_blank() ,
-                                  panel.grid.minor.x = ggplot2::element_blank() ,
-                                  panel.grid.minor.y = ggplot2::element_blank(),
-                                  legend.position="top",
-                                  legend.text = ggplot2::element_text(size = 4),
-                                  legend.title = ggplot2::element_blank()
-                                )
-    CHROM_COLORS <- sample(viridis::turbo(length(levels(SUMMARY_RETURN$SUM$CHROM))*3))[1:length(levels(SUMMARY_RETURN$SUM$CHROM))]
-    SUM_PLOT <- ggplot2::ggplot(SUMMARY_RETURN$SUM) +
-                                ggplot2::geom_line(ggplot2::aes(x=CHROM, y=SUM, color=CHROM, group=1)) +
-                                #ggplot2::scale_color_manual( values = CHROM_COLORS ) +
-                                ggplot2::guides(colour = ggplot2::guide_legend(nrow = 1)) +
-                                ggplot2::xlab("") +
-                                ggplot2::ylab(YLABEL) +
-                                ggplot2::theme_bw() +
-                                ggplot2::theme(
-                                  axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust=1),
-                                  panel.grid.major.x = ggplot2::element_blank() ,
-                                  panel.grid.minor.x = ggplot2::element_blank() ,
-                                  panel.grid.minor.y = ggplot2::element_blank(),
-                                  legend.position="none",
-                                  legend.title = ggplot2::element_blank()
-                                )
     if ( !is.logical(SAMPLE_DB) ) {
       MERGED_PLOT <- ggpubr::ggarrange(SUM_PLOT, SAMPLE_GROUP_PLOT, SAMPLE_PLOT,
                                         labels = c("sum", "group", "sample"),
@@ -244,9 +365,9 @@ chr_analysis <- function( VCF_DATA, METHOD="RAW", SAMPLE_DB=FALSE, SHAPE=FALSE, 
   }
 
   ### run functions
-  SUMMARY <- get_sample_chr( VCF_DATA, METHOD=METHOD )
-  SUMMARY_TR <- transform_summary_chr_db( SUMMARY, SAMPLE_DB=SAMPLE_DB )
-  SUMMARY_PLOTS <- make_summary_chr_plot( SUMMARY_TR, METHOD=METHOD, SAMPLE_DB=SAMPLE_DB, THRESHOLD=THRESHOLD, SHAPE=SHAPE )
+  SUMMARY <- get_sample_chr( VCF_DATA, TYPE=TYPE, METHOD=METHOD )
+  SUMMARY_TR <- transform_summary_chr_db( SUMMARY, TYPE=TYPE, SAMPLE_DB=SAMPLE_DB )
+  SUMMARY_PLOTS <- make_summary_chr_plot( SUMMARY_TR, METHOD=METHOD, TYPE=TYPE, SAMPLE_DB=SAMPLE_DB, THRESHOLD=THRESHOLD, SHAPE=SHAPE )
   names(SUMMARY_TR)[2] <- "SAMPLE"
   RETURN_LIST <- list( 'TAB' = SUMMARY_TR, 'PLOT' = SUMMARY_PLOTS )
   return( RETURN_LIST )

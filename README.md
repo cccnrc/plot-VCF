@@ -160,6 +160,13 @@ chrAnalysis( VCF_FILE, COLOR_SAMPLE = COLOR_SAMPLE, METHOD = "LENCOD" )$PLOT$MER
 ```
 ![plotVCF() chromosome-wise color plot](plots/plotVCF.chr-wise.color.png)
 
+You can also divide your plot based on variant type: [SNV](https://en.wikipedia.org/wiki/Single-nucleotide_polymorphism) vs. [INDEL](https://en.wikipedia.org/wiki/Indel). Just add `TYPE` option to `chrAnalysis()`:
+```
+chrAnalysis( VCF_FILE, COLOR_SAMPLE = COLOR_SAMPLE, METHOD = "LENCOD", TYPE = TRUE )$PLOT$MERGED
+```
+![plotVCF() chromosome-wise type plot](plots/plotVCF.chr-wise.type.png)
+
+
 ## gene summary plots
 This is the function to use if you want to perform an analysis about variant distribution across different genes in your VCF file.
 

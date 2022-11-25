@@ -4,6 +4,7 @@
 #'
 #' @param VCF_FILE Path to the input VCF file
 #' @param METHOD how to count (and plot) variants for each chromosome ("RAW"=raw number, "LEN"=n/chr-length(ratio), "COD"=n/chr-coding-length(ratio), "LENCOD"=n/chr-length(ratio)*chr-coding-length(ratio))
+#' @param TYPE (optional) divide SNP and INDELs
 #' @param FASTA_FILE (optional) Path to the input FASTA file
 #' @param ASSEMBLY (optional) which assembly your VCF is (hg38/hg19)
 #' @param SHAPE (optional) different shape for each sample
@@ -14,7 +15,7 @@
 #' @param CHR_Y (optional) extend the analysis to chrY
 #' @return chromosome-wise summary tables and plots
 #' @export
-chrAnalysis <- function( VCF_FILE, METHOD="RAW", FASTA_FILE = FALSE, ASSEMBLY="hg38", CENTILE = 0.9, SHAPE=FALSE, SAMPLE="ALL", COLOR_SAMPLE=FALSE, THRESHOLD=FALSE, CHR_NAMES=FALSE, CHR_Y=FALSE ){
+chrAnalysis <- function( VCF_FILE, METHOD="RAW", TYPE=FALSE, FASTA_FILE = FALSE, ASSEMBLY="hg38", CENTILE = 0.9, SHAPE=FALSE, SAMPLE="ALL", COLOR_SAMPLE=FALSE, THRESHOLD=FALSE, CHR_NAMES=FALSE, CHR_Y=FALSE ){
   ### check ASSEMBLY or CHR_NAMES are specified
   if ( length(CHR_NAMES) == 1 ) {
     if ( CHR_NAMES == FALSE ) {
@@ -51,6 +52,9 @@ chrAnalysis <- function( VCF_FILE, METHOD="RAW", FASTA_FILE = FALSE, ASSEMBLY="h
   cat('    -> input assembly:', '\t', ASSEMBLY, '\n' )
   cat('    -> input chromos:', '\t', CHR_NAMES, '\n' )
   cat('    -> input SAMPLE:', '\t', SAMPLE, '\n' )
+  if ( TYPE != FALSE ) {
+    cat('    -> input TYPE:', '\t', TYPE, '\n' )
+  }
   if ( FASTA_FILE != FALSE ) {
     cat('    -> input FASTA:', '\t', FASTA_FILE, '\n' )
   }
@@ -106,7 +110,7 @@ chrAnalysis <- function( VCF_FILE, METHOD="RAW", FASTA_FILE = FALSE, ASSEMBLY="h
   } else {
     SAMPLE_DB <- FALSE
   }
-  RETURN_LIST <- chr_analysis( VCF_DATA, METHOD=METHOD, SAMPLE_DB=SAMPLE_DB, SHAPE=SHAPE, THRESHOLD=THRESHOLD, CHR_NAMES=CHR_NAMES )
+  RETURN_LIST <- chr_analysis( VCF_DATA, METHOD=METHOD, TYPE=TYPE, SAMPLE_DB=SAMPLE_DB, SHAPE=SHAPE, THRESHOLD=THRESHOLD, CHR_NAMES=CHR_NAMES )
   cat('\n')
   cat('---------------------------------------------------------------------------\n')
   return( RETURN_LIST )

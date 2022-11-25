@@ -7,6 +7,7 @@
 chr_analysis(
   VCF_DATA,
   METHOD = "RAW",
+  TYPE = FALSE,
   SAMPLE_DB = FALSE,
   SHAPE = FALSE,
   THRESHOLD = FALSE,
@@ -19,6 +20,8 @@ chr_analysis(
 \item{VCF_DATA}{loaded VCF file (read_vcf() output)}
 
 \item{METHOD}{how to count (and plot) variants for each chromosome ("RAW"=raw number, "LEN"=n/chr-length(ratio), "COD"=n/chr-coding-length(ratio), "LENCOD"=n/chr-length(ratio)*chr-coding-length(ratio))}
+
+\item{TYPE}{(optional) divide SNP and INDELs}
 
 \item{SAMPLE_DB}{(optional) 2-column dataframe with sample-group to color plot accordingly}
 
