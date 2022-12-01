@@ -56,7 +56,11 @@ spike_analysis <- function( VCF_DATA, CENTILE = 0.9, SAMPLE_DB=FALSE, SHAPE=FALS
   {
     ### keep only values above 90% centile
     N_START <- nrow(SUMMARY_DB)
-    SUMMARY_DB <- SUMMARY_DB[ SUMMARY_DB$SUM > as.numeric(quantile( SUMMARY_DB$SUM, CENTILE )), ]
+    if ( !is.logical(CENTILE) ) {
+      if ( CENTILE > 0 ) {
+        SUMMARY_DB <- SUMMARY_DB[ SUMMARY_DB$SUM > as.numeric(quantile( SUMMARY_DB$SUM, CENTILE )), ]
+      }
+    }
     N_FILT <- nrow(SUMMARY_DB)
     cat( "  -> transform_summary_db() reduced DB from n.", N_START, "to n.", N_FILT, " ( centile:", CENTILE, ")\n" )
     ### extract samples from passed DB

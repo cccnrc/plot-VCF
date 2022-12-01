@@ -71,10 +71,10 @@ usethis::use_data( GENES37, overwrite = TRUE )
 
 ###### EXONS
 
-query(ah, pattern = c("Homo Sapiens", "ensembl", "GRCh37"))
-ens37 <- ah[['AH10684']]
-exons37 <- ens37[ ens37$type == 'exon' ]
-exons37 <- exons37[ seqnames(exons37) %in% CHR_NAMES ]
+  query(ah, pattern = c("Homo Sapiens", "ensembl", "GRCh37"))
+  ens37 <- ah[['AH10684']]
+  exons37 <- ens37[ ens37$type == 'exon' ]
+  exons37 <- exons37[ seqnames(exons37) %in% CHR_NAMES ]
 
 ### create a GRangesList object from single gene exons GRanges
 genes37 <- unique( exons37$gene_name )
