@@ -1,4 +1,4 @@
-How many times you hoped to easily plot variants in yout VCF files in order to operate a fast visual analysis on them?!
+How many times you hoped to easily plot variants in your VCF files in order to operate a fast visual analysis on them?!
 It happened to me soo many times...and this is exactly why we created this R package for you! :wink:
 
 Let's take a brief look at how it works
