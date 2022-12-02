@@ -5,8 +5,7 @@ Authors@R:
     person("Enrico", "Cocchi", , "cocchi.e89@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7532-956X"))
 Description: Manhattan plot your VCF file.
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.2

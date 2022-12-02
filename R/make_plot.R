@@ -118,7 +118,11 @@ make_plot <- function(MODELED_VCF, SEQINFO, VAR_Y=FALSE, VAR_FLAG="POS", SPACELI
     }
   }
   ### set Y-axis limits as specified by user
-  Y_MAX <- max(MODELED_VCF[,VAR_FLAG])+((max(MODELED_VCF[,VAR_FLAG])-min(MODELED_VCF[,VAR_FLAG]))/6.6)
+  if ( VAR_FLAG != "POS" ) {
+    Y_MAX <- max(MODELED_VCF[,VAR_FLAG])+((max(MODELED_VCF[,VAR_FLAG])-min(MODELED_VCF[,VAR_FLAG]))/6.6)
+  } else {
+    Y_MAX <- max(VAR_Y)
+  }
   if ( XLIM != FALSE ) {
     if ( length(XLIM) == 1 ) {
       XLIMITS <- c(XLIM, Y_MAX)
@@ -139,13 +143,11 @@ make_plot <- function(MODELED_VCF, SEQINFO, VAR_Y=FALSE, VAR_FLAG="POS", SPACELI
       }
       VAR_Y <- MODELED_VCF[,VAR_FLAG]
       Y_AXIS_TEXT <- ggplot2::element_text()
-    }
-    else {
+    } else {
       cat( "\n\t-> ERROR: undefined VCF flag selected with VAR_FLAG!\n" )
       stop()
     }
-  }
-  else {
+  } else {
     if ( 'GENE' %in% colnames(MODELED_VCF) ) {
       MODELED_VCF  <- MODELED_VCF[ MODELED_VCF[,'CHROM'] %in% CHR_NAMES, c('IND','CHROM','POS','GENE')]
     } else {

@@ -107,6 +107,8 @@ load_vcf <- function( VCF_DATA, SEQINFO, SAMPLE="ALL", VAR_FLAG="POS" ){
         }
       }
     }
+  } else {
+    VAR_COL <- data.frame( "start" = POS_COL$start )
   }
 
   ### get GT value

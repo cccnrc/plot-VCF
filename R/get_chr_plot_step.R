@@ -27,5 +27,5 @@ get_chr_plot_step <- function(CHR_N, ORDERED=FALSE){
     GL <- runif(n=sum(CHR_N), min=1e-12, max=.99)
     CHR_Y <- GL
   }
-  CHR_Y
+  return(CHR_Y)
 }
