@@ -45,7 +45,7 @@ chrAnalysis <- function( VCF_FILE, METHOD="RAW", TYPE=FALSE, FASTA_FILE = FALSE,
   ### output passed arguments
   cat('\n')
   cat('---------------------------------------------------------------------------\n')
-  cat('------------------------>   plotVCF v0.0.0.9000   <------------------------\n')
+  cat('------------------------>   plotVCF v0.0.0.9001   <------------------------\n')
   cat('---------------------------------------------------------------------------\n')
   cat('    -> input VCF file:', '\t', VCF_FILE, '\n' )
   cat('    -> input METHOD:', '\t', METHOD, '\n' )

@@ -78,7 +78,7 @@ createVCFplot <- function(VCF_FILE, FASTA_FILE = FALSE, ASSEMBLY="hg38", VAR_FLA
   ### output passed arguments
   cat('\n')
   cat('---------------------------------------------------------------------------\n')
-  cat('------------------------>   plotVCF v0.0.0.9000   <------------------------\n')
+  cat('------------------------>   plotVCF v0.0.0.9001   <------------------------\n')
   cat('---------------------------------------------------------------------------\n')
   cat('    -> input VCF file:', '\t', VCF_FILE, '\n' )
   cat('    -> input assembly:', '\t', ASSEMBLY, '\n' )
